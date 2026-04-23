@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
 import { CheckCircle2, Mail, Lock, User, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [userType, setUserType] = useState('buyer');
+  const navigate = useNavigate();
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    // Simulate login by saving a mock token
+    localStorage.setItem('token', 'mock-jwt-token');
+    navigate('/');
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-[#050B17] text-white font-sans">
@@ -106,7 +114,7 @@ const Login = () => {
               <p className="text-gray-500">Enter your credentials to access your dashboard.</p>
             </div>
 
-            <form className="space-y-6">
+            <form className="space-y-6" onSubmit={handleLogin}>
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Email Address</label>
                 <input 
