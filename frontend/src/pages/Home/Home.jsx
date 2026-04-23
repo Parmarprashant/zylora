@@ -5,6 +5,7 @@ import {
   Truck, RotateCcw, Headset, ArrowRight, LogOut
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { products } from '../../data/products';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -112,20 +113,24 @@ const Home = () => {
           </button>
         </div>
         <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-11 gap-4 md:gap-8">
-          {[
-            { name: 'Electronics', icon: '💻' },
-            { name: 'Fashion', icon: '👕' },
-            { name: 'Agri', icon: '🌾' },
-            { name: 'Home', icon: '🏠' },
-            { name: 'Furniture', icon: '🪑' },
-            { name: 'Sports', icon: '⚽' },
-            { name: 'Beauty', icon: '💄' },
-            { name: 'Toys', icon: '🧸' },
-            { name: 'Books', icon: '📚' },
-            { name: 'Grocery', icon: '🍎' },
-            { name: 'More', icon: '...' },
-          ].map((cat, i) => (
-            <div key={i} className="flex flex-col items-center gap-2 group cursor-pointer">
+            {[
+              { name: 'Electronics', icon: '💻' },
+              { name: 'Fashion', icon: '👕' },
+              { name: 'Agri', icon: '🌾' },
+              { name: 'Home', icon: '🏠' },
+              { name: 'Furniture', icon: '🪑' },
+              { name: 'Sports', icon: '⚽' },
+              { name: 'Beauty', icon: '💄' },
+              { name: 'Toys', icon: '🧸' },
+              { name: 'Books', icon: '📚' },
+              { name: 'Grocery', icon: '🍎' },
+              { name: 'More', icon: '...' },
+            ].map((cat, i) => (
+              <div 
+                key={i} 
+                onClick={() => cat.name !== 'More' && navigate(`/category/${cat.name}`)}
+                className="flex flex-col items-center gap-2 group cursor-pointer"
+              >
               <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full shadow-sm flex items-center justify-center text-xl group-hover:shadow-md transition-all border border-gray-100">
                 {cat.icon}
               </div>
@@ -146,15 +151,14 @@ const Home = () => {
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              { name: 'Samsung Galaxy M34 5G', price: '12,999', old: '22,999', rating: 4.5, img: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&q=80&w=400', discount: '43% OFF' },
-              { name: 'Apple iPhone 15 (128 GB)', price: '69,999', old: '79,999', rating: 4.8, img: 'https://images.unsplash.com/photo-1696446701796-da61225697cc?auto=format&fit=crop&q=80&w=400', discount: '12% OFF' },
-              { name: 'boAt Airdopes 131', price: '1,299', old: '2,999', rating: 4.2, img: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?auto=format&fit=crop&q=80&w=400', discount: '56% OFF' },
-              { name: 'Redmi Note 13 Pro', price: '23,999', old: '28,999', rating: 4.4, img: 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&q=80&w=400', discount: '17% OFF' },
-            ].map((prod, i) => (
-              <div key={i} className="group cursor-pointer">
+            {products.map((prod, i) => (
+              <div 
+                key={i} 
+                className="group cursor-pointer"
+                onClick={() => navigate(`/product/${prod.id}`)}
+              >
                 <div className="relative aspect-square bg-[#F3F4F6] rounded-xl overflow-hidden mb-4">
-                  <img src={prod.img} alt={prod.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img src={prod.images[0]} alt={prod.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   <span className="absolute top-3 left-3 bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded">{prod.discount}</span>
                   <button className="absolute bottom-3 right-3 bg-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 duration-300">
                     <ShoppingCart size={18} className="text-gray-900" />
@@ -166,8 +170,8 @@ const Home = () => {
                   <span className="text-[10px] text-gray-400 ml-1">({prod.rating})</span>
                 </div>
                 <div className="flex items-center gap-2 mt-2">
-                  <span className="text-lg font-bold text-gray-900">₹{prod.price}</span>
-                  <span className="text-xs text-gray-400 line-through">₹{prod.old}</span>
+                  <span className="text-lg font-bold text-gray-900">₹{prod.price.toLocaleString()}</span>
+                  <span className="text-xs text-gray-400 line-through">₹{prod.oldPrice.toLocaleString()}</span>
                 </div>
               </div>
             ))}
@@ -177,7 +181,10 @@ const Home = () => {
 
       {/* Featured Banners */}
       <section className="max-w-7xl mx-auto px-4 py-12 grid md:grid-cols-2 gap-6">
-        <div className="relative h-[250px] rounded-2xl overflow-hidden group cursor-pointer">
+        <div 
+          onClick={() => navigate('/category/Electronics')}
+          className="relative h-[250px] rounded-2xl overflow-hidden group cursor-pointer"
+        >
           <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&q=80&w=800" alt="Electronics" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
           <div className="absolute inset-0 bg-black/40 flex flex-col justify-center px-8">
             <span className="text-amber-500 text-xs font-bold uppercase tracking-widest">Next Gen Tech</span>
@@ -187,7 +194,10 @@ const Home = () => {
             </button>
           </div>
         </div>
-        <div className="relative h-[250px] rounded-2xl overflow-hidden group cursor-pointer">
+        <div 
+          onClick={() => navigate('/category/Fashion')}
+          className="relative h-[250px] rounded-2xl overflow-hidden group cursor-pointer"
+        >
           <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=800" alt="Fashion" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
           <div className="absolute inset-0 bg-black/40 flex flex-col justify-center px-8">
             <span className="text-amber-500 text-xs font-bold uppercase tracking-widest">Spring Summer '24</span>

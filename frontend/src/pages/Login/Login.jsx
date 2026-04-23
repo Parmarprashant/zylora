@@ -23,7 +23,10 @@ const Login = () => {
     setLoading(true);
     
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://zylora-3.onrender.com/api';
+      const apiUrl = import.meta.env.VITE_API_URL || 
+        (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+          ? 'http://localhost:5000/api' 
+          : 'https://zylora-3.onrender.com/api');
       const res = await axios.post(`${apiUrl}/auth/login`, formData);
       
       if (res.data.success) {
