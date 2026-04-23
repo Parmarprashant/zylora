@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
 import { CheckCircle2, Mail, Lock, User, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Signup = () => {
   const [userType, setUserType] = useState('buyer');
+  const navigate = useNavigate();
+
+  const handleSignup = (e) => {
+    e.preventDefault();
+    // Simulate signup by saving a mock token
+    localStorage.setItem('token', 'mock-jwt-token');
+    navigate('/');
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-[#050B17] text-white font-sans">
@@ -106,7 +114,7 @@ const Signup = () => {
               <p className="text-gray-500">Join the premium marketplace for curated auctions.</p>
             </div>
 
-            <form className="space-y-6">
+            <form className="space-y-6" onSubmit={handleSignup}>
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Full Name</label>
                 <input 

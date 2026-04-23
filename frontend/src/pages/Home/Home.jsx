@@ -2,10 +2,17 @@ import React from 'react';
 import { 
   Search, Menu, ShoppingCart, Heart, User, 
   ChevronRight, Clock, Star, ShieldCheck, 
-  Truck, RotateCcw, Headset, ArrowRight
+  Truck, RotateCcw, Headset, ArrowRight, LogOut
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
   return (
     <div className="min-h-screen bg-[#F8F9FB] text-gray-900 font-sans">
       {/* Top Notification Bar */}
@@ -39,10 +46,15 @@ const Home = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-3 md:gap-6">
-            <div className="hidden md:flex flex-col text-right">
-              <span className="text-[10px] text-gray-400">Welcome</span>
-              <span className="text-xs font-semibold">Sign In / Register</span>
-            </div>
+            <button 
+              onClick={handleLogout}
+              className="hidden md:flex flex-col text-right group"
+            >
+              <span className="text-[10px] text-gray-400 group-hover:text-amber-500 transition-colors">Sign Out</span>
+              <span className="text-xs font-semibold flex items-center gap-1 group-hover:text-amber-500 transition-colors">
+                <LogOut size={12} /> Logout
+              </span>
+            </button>
             <div className="flex items-center gap-4 text-gray-300">
               <Heart size={20} className="cursor-pointer hover:text-white" />
               <div className="relative cursor-pointer hover:text-white">
