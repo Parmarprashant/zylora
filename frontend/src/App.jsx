@@ -3,8 +3,10 @@ import Home from './pages/Home/Home';
 import Signup from './pages/Signup/Signup';
 import Login from './pages/Login/Login';
 import ProductDetail from './pages/ProductDetail/ProductDetail';
+import Negotiation from './pages/Negotiation/Negotiation';
 import CategoryPage from './pages/CategoryPage/CategoryPage';
 import Cart from './pages/Cart/Cart';
+import Checkout from './pages/Checkout/Checkout';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 import { CartProvider } from './context/CartContext';
@@ -36,6 +38,14 @@ function App() {
             } 
           />
           <Route 
+            path="/negotiate/:id" 
+            element={
+              <ProtectedRoute>
+                <Negotiation />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
             path="/category/:categoryName" 
             element={
               <ProtectedRoute>
@@ -44,13 +54,21 @@ function App() {
             } 
           />
           <Route 
-            path="/cart" 
-            element={
-              <ProtectedRoute>
-                <Cart />
-              </ProtectedRoute>
-            } 
-          />
+          path="/cart" 
+          element={
+            <ProtectedRoute>
+              <Cart />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/checkout" 
+          element={
+            <ProtectedRoute>
+              <Checkout />
+            </ProtectedRoute>
+          } 
+        />
           
           {/* Catch-all route redirects to home (which will redirect to login if not authenticated) */}
           <Route path="*" element={<Navigate to="/" replace />} />

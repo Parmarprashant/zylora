@@ -210,7 +210,10 @@ const ProductDetail = () => {
           </div>
 
           {showNegotiateButton() && (
-            <button className="w-full mt-4 bg-teal-600 text-white py-4 rounded-xl font-bold hover:bg-teal-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-teal-600/20 border-2 border-teal-500">
+            <button 
+              onClick={() => navigate(`/negotiate/${product.id}`)}
+              className="w-full mt-4 bg-teal-600 text-white py-4 rounded-xl font-bold hover:bg-teal-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-teal-600/20 border-2 border-teal-500"
+            >
               <MessageSquare size={18} /> NEGOTIATE PRICE
             </button>
           )}
@@ -247,7 +250,10 @@ const ProductDetail = () => {
               ))}
             </div>
 
-            <button className="w-full mt-6 bg-[#0D9488] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#0F766E] transition-colors shadow-lg shadow-teal-500/20">
+            <button 
+              onClick={() => navigate(`/negotiate/${product.id}`)}
+              className="w-full mt-6 bg-[#0D9488] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#0F766E] transition-colors shadow-lg shadow-teal-500/20"
+            >
               <MessageSquare size={18} /> Make Bulk Offer
             </button>
           </div>

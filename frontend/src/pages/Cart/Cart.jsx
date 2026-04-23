@@ -220,7 +220,10 @@ const Cart = () => {
                 You will save ₹{(stats.discount + stats.negotiationSavings).toLocaleString()} on this order
               </div>
 
-              <button className="w-full bg-[#0A1628] text-white py-4 rounded-xl font-bold hover:bg-black transition-all shadow-xl shadow-blue-900/10 mb-6 uppercase tracking-widest text-xs">
+              <button 
+                onClick={() => navigate('/checkout')}
+                className="w-full bg-[#0A1628] text-white py-4 rounded-xl font-bold hover:bg-black transition-all shadow-xl shadow-blue-900/10 mb-6 uppercase tracking-widest text-xs"
+              >
                 Proceed to Checkout
               </button>
 
