@@ -15,7 +15,7 @@ export const WishlistProvider = ({ children }) => {
 
   const fetchWishlist = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       if (!token) {
         setWishlistItems([]);
         setLoading(false);
@@ -33,7 +33,7 @@ export const WishlistProvider = ({ children }) => {
     } catch (error) {
       console.error('Error fetching wishlist:', error);
       if (error.response?.status === 401) {
-        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
         setWishlistItems([]);
       }
     } finally {
@@ -43,7 +43,7 @@ export const WishlistProvider = ({ children }) => {
 
   const addToWishlist = async (productId) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       if (!token) {
         alert('Please login to add items to wishlist');
         return false;
@@ -68,7 +68,7 @@ export const WishlistProvider = ({ children }) => {
 
   const removeFromWishlist = async (productId) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       if (!token) return false;
 
       const config = {

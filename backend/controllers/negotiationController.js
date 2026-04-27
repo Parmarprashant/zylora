@@ -1,4 +1,6 @@
 const Message = require('../models/Message');
+const Product = require('../models/Product');
+const Negotiation = require('../models/Negotiation');
 
 // @desc    Get chat history for a product
 // @route   GET /api/negotiation/:productId
@@ -12,6 +14,147 @@ exports.getChatHistory = async (req, res) => {
     res.status(200).json({
       success: true,
       data: messages
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+// @desc    Get seller negotiation summary across seller products
+// @route   GET /api/negotiation/seller/summary
+// @access  Private/Seller
+exports.getSellerNegotiationSummary = async (req, res) => {
+  try {
+    if (req.user.role !== 'seller') {
+      return res.status(403).json({
+        success: false,
+        error: 'Only sellers can view negotiation summaries'
+      });
+    }
+
+    const sellerProducts = await Product.find({ seller: req.user._id })
+      .select('_id name images price');
+
+    const sellerProductIds = sellerProducts.map((product) => product._id);
+
+    if (sellerProductIds.length === 0) {
+      return res.status(200).json({
+        success: true,
+        data: {
+          openNegotiations: 0,
+          newRequests: 0,
+          conversations: []
+        }
+      });
+    }
+
+    const productMap = new Map(
+      sellerProducts.map((product) => [
+        product._id.toString(),
+        {
+          id: product._id.toString(),
+          name: product.name,
+          image: product.images?.[0] || 'https://via.placeholder.com/150',
+          price: product.price
+        }
+      ])
+    );
+
+    const messages = await Message.find({ productId: { $in: sellerProductIds } })
+      .sort('-createdAt')
+      .populate('sender', 'name role');
+
+    const conversationMap = new Map();
+
+    messages.forEach((message) => {
+      const senderId = message.sender?._id?.toString?.() || message.sender?.toString?.();
+      const productId = message.productId.toString();
+      const conversationKey = `${productId}:${senderId}`;
+
+      if (message.sender?.role === 'seller' || conversationMap.has(conversationKey)) {
+        return;
+      }
+
+      conversationMap.set(conversationKey, {
+        id: conversationKey,
+        buyerName: message.sender?.name || 'Buyer',
+        buyerInitial: (message.sender?.name || 'B').slice(0, 2).toUpperCase(),
+        product: productMap.get(productId),
+        lastMessage: message.text,
+        offerPrice: message.offerPrice || null,
+        messageType: message.type,
+        createdAt: message.createdAt
+      });
+    });
+
+    const conversations = Array.from(conversationMap.values())
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    const newRequests = conversations.filter((conversation) => {
+      const ageMs = new Date() - new Date(conversation.createdAt);
+      return ageMs <= 24 * 60 * 60 * 1000;
+    }).length;
+
+    res.status(200).json({
+      success: true,
+      data: {
+        openNegotiations: conversations.length,
+        newRequests,
+        conversations: conversations.slice(0, 5)
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+// @desc    Get seller accepted negotiations
+// @route   GET /api/negotiation/seller/accepted
+// @access  Private/Seller
+exports.getSellerAcceptedNegotiations = async (req, res) => {
+  try {
+    if (req.user.role !== 'seller') {
+      return res.status(403).json({
+        success: false,
+        error: 'Only sellers can view accepted negotiations'
+      });
+    }
+
+    const negotiations = await Negotiation.find({
+      seller: req.user._id,
+      status: 'AGREED'
+    })
+      .populate('buyer', 'name email phone')
+      .populate('productId', 'name description images price')
+      .sort('-updatedAt');
+
+    const data = negotiations
+      .filter((item) => item.productId && item.buyer)
+      .map((item) => ({
+        _id: item._id,
+        status: item.status,
+        agreedPrice: item.agreedPrice,
+        lastOfferPrice: item.lastOfferPrice,
+        updatedAt: item.updatedAt,
+        buyer: {
+          id: item.buyer._id,
+          name: item.buyer.name,
+          email: item.buyer.email || '',
+          phone: item.buyer.phone || ''
+        },
+        product: {
+          id: item.productId._id,
+          name: item.productId.name,
+          description: item.productId.description,
+          image: item.productId.images?.[0] || 'https://via.placeholder.com/150',
+          price: item.productId.price
+        }
+      }));
+
+    res.status(200).json({
+      success: true,
+      count: data.length,
+      data
     });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

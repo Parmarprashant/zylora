@@ -50,7 +50,7 @@ const Negotiation = () => {
 
   useEffect(() => {
     // Improved user data parsing with fallback
-    const userData = localStorage.getItem('user');
+    const userData = sessionStorage.getItem('user');
     let user = null;
     try {
       user = userData ? JSON.parse(userData) : null;
@@ -76,7 +76,7 @@ const Negotiation = () => {
 
     const fetchProductAndChat = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         const config = { headers: { Authorization: `Bearer ${token}` } };
 
         // 1. Fetch Product
@@ -128,7 +128,7 @@ const Negotiation = () => {
       } catch (err) {
         console.error('Error fetching data:', err);
         if (err.response?.status === 401) {
-          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
           navigate('/login');
         }
       } finally {
@@ -195,7 +195,7 @@ const Negotiation = () => {
     e.preventDefault();
     if (!newMessage.trim()) return;
 
-    const user = JSON.parse(localStorage.getItem('user'));
+    const user = JSON.parse(sessionStorage.getItem('user'));
     const senderId = user?._id || user?.id;
 
     const msg = {
@@ -214,6 +214,7 @@ const Negotiation = () => {
         productId: id,
         text: newMessage,
         senderId: senderId,
+        senderRole: user?.role || 'buyer',
         type: 'text'
       });
     }
@@ -222,13 +223,16 @@ const Negotiation = () => {
   };
 
   const handleUpdateDealStatus = (status) => {
+    const user = JSON.parse(sessionStorage.getItem('user') || 'null');
     setDealStatus(status);
     if (socket.current) {
       socket.current.emit('deal_update', {
         productId: id,
         status: status,
         price: agreedPrice,
-        sender: userRole
+        sender: userRole,
+        senderRole: userRole,
+        senderId: user?._id || user?.id
       });
     }
 

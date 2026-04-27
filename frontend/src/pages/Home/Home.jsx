@@ -99,34 +99,35 @@ const Home = () => {
       {/* Categories Section */}
       <section className="max-w-7xl mx-auto px-4 py-12">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-xl font-bold">Shop by Category</h2>
-          <button className="text-blue-600 text-sm font-semibold flex items-center gap-1 hover:underline">
-            View All <ChevronRight size={16} />
+          <h2 className="text-2xl font-bold text-gray-900">Explore Categories</h2>
+          <button className="text-amber-500 text-sm font-bold flex items-center gap-1 hover:text-amber-600 transition-colors group">
+            View All <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
-        <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-11 gap-4 md:gap-8">
+        <div className="flex overflow-x-auto pb-6 pt-2 gap-6 md:gap-8 justify-start lg:justify-between snap-x no-scrollbar">
             {[
-              { name: 'Electronics', icon: '💻' },
-              { name: 'Fashion', icon: '👕' },
-              { name: 'Agri', icon: '🌾' },
-              { name: 'Home', icon: '🏠' },
-              { name: 'Furniture', icon: '🪑' },
-              { name: 'Sports', icon: '⚽' },
-              { name: 'Beauty', icon: '💄' },
-              { name: 'Toys', icon: '🧸' },
-              { name: 'Books', icon: '📚' },
-              { name: 'Grocery', icon: '🍎' },
-              { name: 'More', icon: '...' },
+              { name: 'Electronics', image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&q=80&w=200' },
+              { name: 'Fashion', image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=200' },
+              { name: 'Agri', image: 'https://images.unsplash.com/photo-1592982537447-6f2334cb4908?auto=format&fit=crop&q=80&w=200' },
+              { name: 'Home', image: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&q=80&w=200' },
+              { name: 'Furniture', image: 'https://images.unsplash.com/photo-1505693314120-0d443867891c?auto=format&fit=crop&q=80&w=200' },
+              { name: 'Sports', image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&q=80&w=200' },
+              { name: 'Beauty', image: 'https://images.unsplash.com/photo-1596462502278-27bf85033e5a?auto=format&fit=crop&q=80&w=200' },
+              { name: 'Toys', image: 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?auto=format&fit=crop&q=80&w=200' },
+              { name: 'Books', image: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&q=80&w=200' },
+              { name: 'Grocery', image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=200' },
             ].map((cat, i) => (
               <div 
                 key={i} 
-                onClick={() => cat.name !== 'More' && navigate(`/category/${cat.name}`)}
-                className="flex flex-col items-center gap-2 group cursor-pointer"
+                onClick={() => navigate(`/category/${cat.name}`)}
+                className="flex flex-col items-center gap-3 group cursor-pointer snap-start min-w-[72px] md:min-w-[88px]"
               >
-              <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full shadow-sm flex items-center justify-center text-xl group-hover:shadow-md transition-all border border-gray-100">
-                {cat.icon}
+              <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden shadow-sm group-hover:shadow-xl group-hover:-translate-y-1.5 transition-all duration-300 ring-2 ring-transparent group-hover:ring-amber-400 p-[2px]">
+                <div className="w-full h-full rounded-full overflow-hidden bg-gray-100">
+                  <img src={cat.image} alt={cat.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                </div>
               </div>
-              <span className="text-[10px] md:text-xs font-medium text-gray-600 group-hover:text-blue-600">{cat.name}</span>
+              <span className="text-[11px] md:text-sm font-bold text-gray-700 group-hover:text-amber-600 transition-colors">{cat.name}</span>
             </div>
           ))}
         </div>
