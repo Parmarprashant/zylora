@@ -23,7 +23,7 @@ const TrackOrder = () => {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (!token) {
           navigate('/login');
           return;
@@ -40,7 +40,7 @@ const TrackOrder = () => {
       } catch (err) {
         console.error('Failed to fetch order:', err);
         if (err.response?.status === 401) {
-          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
           navigate('/login');
         }
         setLoading(false);

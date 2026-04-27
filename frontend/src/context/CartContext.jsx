@@ -15,7 +15,7 @@ export const CartProvider = ({ children }) => {
 
   const fetchCart = useCallback(async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       if (!token) {
         // Fallback to local storage for guests
         const savedCart = localStorage.getItem('zylora_cart');
@@ -46,7 +46,7 @@ export const CartProvider = ({ children }) => {
       
       // If unauthorized, clear token and state
       if (error.response?.status === 401) {
-        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
         setCartItems([]);
         setLoading(false);
         return;
@@ -66,7 +66,7 @@ export const CartProvider = ({ children }) => {
 
   // Sync with local storage for guests
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (!token) {
       localStorage.setItem('zylora_cart', JSON.stringify(cartItems));
     }
@@ -74,7 +74,7 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = async (product, quantity = 1) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       if (!token) {
         // Guest mode
         setCartItems(prevItems => {
@@ -109,7 +109,7 @@ export const CartProvider = ({ children }) => {
 
   const removeFromCart = async (id) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       if (!token) {
         setCartItems(prevItems => prevItems.filter(item => item.id !== id));
         return;
@@ -132,7 +132,7 @@ export const CartProvider = ({ children }) => {
       if (!item) return;
       const newQuantity = Math.max(1, item.quantity + delta);
 
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       if (!token) {
         setCartItems(prevItems =>
           prevItems.map(item =>
@@ -155,7 +155,7 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       if (!token) {
         setCartItems([]);
         return;

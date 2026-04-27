@@ -36,7 +36,7 @@ const Checkout = () => {
   useEffect(() => {
     const fetchUserAddresses = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (!token) return;
 
         const res = await axios.get(`${BACKEND_URL}/api/auth/me`, {
@@ -48,7 +48,7 @@ const Checkout = () => {
       } catch (err) {
         console.error('Error fetching addresses:', err);
         if (err.response?.status === 401) {
-          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
           navigate('/login');
         }
       }
@@ -83,7 +83,7 @@ const Checkout = () => {
     }
     
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const res = await axios.delete(`${BACKEND_URL}/api/auth/addresses/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -93,7 +93,7 @@ const Checkout = () => {
     } catch (err) {
       console.error('Error deleting address:', err);
       if (err.response?.status === 401) {
-        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
         navigate('/login');
       } else {
         alert('Failed to delete address');
@@ -108,7 +108,7 @@ const Checkout = () => {
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       let res;
       if (editingId) {
         res = await axios.put(`${BACKEND_URL}/api/auth/addresses/${editingId}`, newAddress, {
@@ -134,7 +134,7 @@ const Checkout = () => {
 
   const selectAddress = async (id) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const res = await axios.put(`${BACKEND_URL}/api/auth/addresses/${id}/select`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -158,7 +158,7 @@ const Checkout = () => {
     ? 'http://localhost:5001' 
     : 'https://zylora-3.onrender.com';
 
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       
       const orderData = {
         orderItems: cartItems.map(item => ({

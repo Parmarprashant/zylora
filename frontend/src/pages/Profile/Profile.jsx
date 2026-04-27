@@ -33,7 +33,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (!token) {
           navigate('/login');
           return;
@@ -62,7 +62,7 @@ const Profile = () => {
       } catch (error) {
         console.error('Error fetching profile data:', error);
         if (error.response?.status === 401) {
-          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
           navigate('/login');
         }
         setLoading(false);
@@ -76,7 +76,7 @@ const Profile = () => {
     e.preventDefault();
     setUpdating(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const config = {
         headers: { 
           'Content-Type': 'application/json',
@@ -93,7 +93,7 @@ const Profile = () => {
     } catch (error) {
       console.error('Error updating profile:', error);
       if (error.response?.status === 401) {
-        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
         navigate('/login');
       } else {
         alert(error.response?.data?.error || 'Failed to update profile');

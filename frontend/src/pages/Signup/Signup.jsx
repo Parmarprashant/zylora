@@ -46,8 +46,8 @@ const Signup = () => {
       const res = await axios.post(`${apiUrl}/auth/signup`, formData);
       
       if (res.data.success) {
-        localStorage.setItem('token', res.data.token);
-        localStorage.setItem('user', JSON.stringify(res.data.user));
+        sessionStorage.setItem('token', res.data.token);
+        sessionStorage.setItem('user', JSON.stringify(res.data.user));
         
         // Redirect immediately based on role
         if (res.data.user.role === 'seller') {

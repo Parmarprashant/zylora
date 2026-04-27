@@ -17,7 +17,7 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const { addToCart, cartCount } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist, wishlistCount } = useWishlist();
-  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  const user = JSON.parse(sessionStorage.getItem('user') || 'null');
   const isSeller = user?.role === 'seller';
   
   const [product, setProduct] = useState(null);

@@ -5,6 +5,8 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const Message = require('./models/Message');
+const Product = require('./models/Product');
+const Negotiation = require('./models/Negotiation');
 
 // Load env vars
 dotenv.config();
@@ -24,6 +26,10 @@ const io = new Server(server, {
 // Socket.io Logic
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
+
+  const findLatestNegotiation = async (productId, sellerId) => {
+    return Negotiation.findOne({ productId, seller: sellerId }).sort('-lastMessageAt');
+  };
 
   socket.on('join_negotiation', (productId) => {
     if (productId) {
@@ -47,6 +53,43 @@ io.on('connection', (socket) => {
         type: data.type || 'text',
         offerPrice: data.offerPrice
       });
+
+      const product = await Product.findById(data.productId).select('seller');
+
+      if (product) {
+        if (data.senderRole === 'buyer') {
+          const update = {
+            status: data.type === 'offer' ? 'COUNTERED' : 'PENDING',
+            lastMessage: data.text,
+            lastMessageAt: newMessage.createdAt
+          };
+
+          if (typeof data.offerPrice === 'number') {
+            update.lastOfferPrice = data.offerPrice;
+          }
+
+          await Negotiation.findOneAndUpdate(
+            {
+              productId: data.productId,
+              buyer: data.senderId,
+              seller: product.seller
+            },
+            { $set: update },
+            {
+              upsert: true,
+              new: true,
+              setDefaultsOnInsert: true
+            }
+          );
+        } else if (data.senderRole === 'seller') {
+          const latestNegotiation = await findLatestNegotiation(data.productId, product.seller);
+          if (latestNegotiation) {
+            latestNegotiation.lastMessage = data.text;
+            latestNegotiation.lastMessageAt = newMessage.createdAt;
+            await latestNegotiation.save();
+          }
+        }
+      }
 
       console.log('Message saved and emitting:', data);
       socket.to(data.productId).emit('receive_message', {
@@ -86,6 +129,44 @@ io.on('connection', (socket) => {
        }
 
        console.log('Deal update received:', data);
+
+       const product = await Product.findById(data.productId).select('seller');
+       if (product) {
+         let negotiation = null;
+
+         if (data.senderRole === 'buyer' && data.senderId) {
+           negotiation = await Negotiation.findOneAndUpdate(
+             {
+               productId: data.productId,
+               buyer: data.senderId,
+               seller: product.seller
+             },
+             {
+               $set: {
+                 status: data.status,
+                 agreedPrice: data.price || 0,
+                 lastMessage: `Deal status updated to ${data.status}`,
+                 lastMessageAt: new Date()
+               }
+             },
+             {
+               upsert: true,
+               new: true,
+               setDefaultsOnInsert: true
+             }
+           );
+         } else if (data.senderRole === 'seller') {
+           negotiation = await findLatestNegotiation(data.productId, product.seller);
+           if (negotiation) {
+             negotiation.status = data.status;
+             negotiation.agreedPrice = data.price || negotiation.agreedPrice || 0;
+             negotiation.lastMessage = `Deal status updated to ${data.status}`;
+             negotiation.lastMessageAt = new Date();
+             await negotiation.save();
+           }
+         }
+       }
+
        socket.to(data.productId).emit('deal_update', {
          status: data.status,
          price: data.price,

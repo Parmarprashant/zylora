@@ -20,7 +20,7 @@ const SellerOrders = () => {
   useEffect(() => {
     const fetchSellerOrders = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         const res = await axios.get(`${BACKEND_URL}/api/orders/seller-orders`, {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -31,7 +31,7 @@ const SellerOrders = () => {
       } catch (err) {
         console.error('Failed to fetch seller orders:', err);
         if (err.response?.status === 401) {
-          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
           navigate('/login');
         }
       } finally {
