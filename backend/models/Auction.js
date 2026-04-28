@@ -39,6 +39,39 @@ const auctionSchema = new mongoose.Schema({
     time: {
       type: Date,
       default: Date.now
+    },
+    amountPaid: {
+      type: Number,
+      required: true,
+      default: 0
+    },
+    isActive: {
+      type: Boolean,
+      default: true
+    }
+  }],
+  // Track user payment history per auction
+  userPayments: [{
+    user: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    totalPaid: {
+      type: Number,
+      default: 0
+    },
+    currentBid: {
+      type: Number,
+      default: 0
+    },
+    refundAmount: {
+      type: Number,
+      default: 0
+    },
+    isRefunded: {
+      type: Boolean,
+      default: false
     }
   }],
   status: {
