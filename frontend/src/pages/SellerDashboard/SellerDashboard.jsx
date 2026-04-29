@@ -230,7 +230,7 @@ const SellerDashboard = ({ initialTab = 'Dashboard' }) => {
   const stats = [
     {
       label: 'TOTAL REVENUE',
-      value: `₹${totalRevenue.toLocaleString()}`,
+      value: `\u20B9${totalRevenue.toLocaleString()}`,
       change: revenueChangeText,
       icon: Wallet,
       color: 'text-amber-500',
@@ -388,7 +388,7 @@ const SellerDashboard = ({ initialTab = 'Dashboard' }) => {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Price (₹)</label>
+                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Price (&#8377;)</label>
                         <input
                           type="number"
                           required
@@ -519,7 +519,7 @@ const SellerDashboard = ({ initialTab = 'Dashboard' }) => {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Price (₹)</label>
+                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Price (&#8377;)</label>
                         <input
                           type="number"
                           required
@@ -709,7 +709,7 @@ const SellerDashboard = ({ initialTab = 'Dashboard' }) => {
                             <span className="text-sm font-bold text-gray-900">{product.name}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-sm font-medium text-gray-600">₹{product.price.toLocaleString()}</td>
+                        <td className="px-6 py-4 text-sm font-medium text-gray-600">&#8377;{product.price.toLocaleString()}</td>
                         <td className="px-6 py-4 text-sm font-medium text-gray-600">{product.stock}</td>
                         <td className="px-6 py-4">
                           <span className={`text-[10px] font-bold px-2 py-1 rounded ${product.negotiable ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-gray-400'}`}>
@@ -804,7 +804,7 @@ const SellerDashboard = ({ initialTab = 'Dashboard' }) => {
                                   <span className="text-sm font-bold text-gray-900">{product.name}</span>
                                 </div>
                               </td>
-                              <td className="px-6 py-4 text-sm font-medium text-gray-600">₹{product.price.toLocaleString()}</td>
+                              <td className="px-6 py-4 text-sm font-medium text-gray-600">&#8377;{product.price.toLocaleString()}</td>
                               <td className="px-6 py-4 text-sm font-medium text-gray-600">{product.stock}</td>
                               <td className="px-6 py-4 text-right">
                                 <button
@@ -896,7 +896,7 @@ const SellerDashboard = ({ initialTab = 'Dashboard' }) => {
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-sm font-bold text-gray-900">₹{order.sellerTotal.toLocaleString()}</div>
+                            <div className="text-sm font-bold text-gray-900">&#8377;{order.sellerTotal.toLocaleString()}</div>
                             <div className={`text-[10px] font-black mt-1 ${statusColor(order.status)}`}>
                               {order.status.toUpperCase()}
                             </div>

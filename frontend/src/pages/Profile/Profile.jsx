@@ -323,9 +323,9 @@ const Profile = () => {
                                 </div>
 
                                 <div className="mt-4 flex items-baseline gap-3">
-                                  <span className="text-xl font-bold text-gray-900">₹{item.price.toLocaleString()}</span>
+                                  <span className="text-xl font-bold text-gray-900">&#8377;{item.price.toLocaleString()}</span>
                                   {item.originalPrice && (
-                                    <span className="text-sm text-gray-400 line-through">₹{item.originalPrice.toLocaleString()}</span>
+                                    <span className="text-sm text-gray-400 line-through">&#8377;{item.originalPrice.toLocaleString()}</span>
                                   )}
                                 </div>
 

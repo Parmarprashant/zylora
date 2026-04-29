@@ -226,6 +226,11 @@ const negotiation = require('./routes/negotiationRoutes');
 const auctions = require('./routes/auctionRoutes');
 const payments = require('./routes/paymentRoutes');
 
+// Keep-Alive route for cron-job.org
+app.get('/api/ping', (req, res) => {
+  res.status(200).send('pong');
+});
+
 // Mount routers
 app.use('/api/auth', auth);
 app.use('/api/orders', orders);

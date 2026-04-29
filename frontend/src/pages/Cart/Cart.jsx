@@ -59,8 +59,8 @@ const Cart = () => {
                       <div>
                         <h3 className="text-xl font-bold text-gray-900 mb-1">{item.name}</h3>
                         <div className="flex items-center gap-3 mb-2">
-                          <span className="text-2xl font-black text-gray-900">₹{item.price.toLocaleString()}</span>
-                          <span className="text-sm text-gray-400 line-through">₹{item.oldPrice.toLocaleString()}</span>
+                          <span className="text-2xl font-black text-gray-900">&#8377;{item.price.toLocaleString()}</span>
+                          <span className="text-sm text-gray-400 line-through">&#8377;{item.oldPrice.toLocaleString()}</span>
                         </div>
                         {item.delivery && (
                            <p className="text-xs text-gray-500 flex items-center gap-1.5">
@@ -77,7 +77,7 @@ const Cart = () => {
                       
                       {item.negotiated && (
                         <div className="bg-[#E0F2F1] text-[#00897B] px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-[#B2DFDB]">
-                          Negotiated: ₹{item.price.toLocaleString()}
+                          Negotiated: &#8377;{item.price.toLocaleString()}
                         </div>
                       )}
                     </div>
@@ -156,16 +156,16 @@ const Cart = () => {
               <div className="space-y-4 mb-8 border-b border-gray-50 pb-8">
                 <div className="flex justify-between text-sm font-medium">
                   <span className="text-gray-500">Price ({cartItems.length} items)</span>
-                  <span className="text-gray-900 font-bold">₹{stats.originalSubtotal.toLocaleString()}</span>
+                  <span className="text-gray-900 font-bold">&#8377;{stats.originalSubtotal.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-sm font-medium">
                   <span className="text-gray-500">Discount</span>
-                  <span className="text-green-600 font-bold">-₹{stats.discount.toLocaleString()}</span>
+                  <span className="text-green-600 font-bold">-&#8377;{stats.discount.toLocaleString()}</span>
                 </div>
                 {stats.negotiationSavings > 0 && (
                   <div className="flex justify-between text-sm font-medium">
                     <span className="text-teal-600">Negotiation Savings</span>
-                    <span className="text-teal-600 font-bold">-₹{stats.negotiationSavings.toLocaleString()}</span>
+                    <span className="text-teal-600 font-bold">-&#8377;{stats.negotiationSavings.toLocaleString()}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm font-medium">
@@ -177,12 +177,12 @@ const Cart = () => {
               <div className="flex justify-between items-end mb-8">
                 <div>
                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Amount</p>
-                   <p className="text-3xl font-black text-gray-900">₹{stats.total.toLocaleString()}</p>
+                   <p className="text-3xl font-black text-gray-900">&#8377;{stats.total.toLocaleString()}</p>
                 </div>
               </div>
 
               <div className="bg-green-50 text-green-700 p-3 rounded-xl text-[10px] font-bold text-center uppercase tracking-widest mb-6 border border-green-100">
-                You will save ₹{(stats.discount + stats.negotiationSavings).toLocaleString()} on this order
+                You will save &#8377;{(stats.discount + stats.negotiationSavings).toLocaleString()} on this order
               </div>
 
               <button 

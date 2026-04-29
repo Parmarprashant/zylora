@@ -139,7 +139,7 @@ const SellerNegotiations = () => {
                   <div className="flex items-center justify-between pt-4 border-t border-gray-50">
                     <div>
                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Accepted Price</p>
-                      <p className="text-lg font-bold text-gray-900">₹{(item.agreedPrice || item.product.price).toLocaleString()}</p>
+                      <p className="text-lg font-bold text-gray-900">&#8377;{(item.agreedPrice || item.product.price).toLocaleString()}</p>
                     </div>
                     <button
                       onClick={() => navigate(`/negotiate/${item.product.id}?buyerId=${item.buyer.id}`)}

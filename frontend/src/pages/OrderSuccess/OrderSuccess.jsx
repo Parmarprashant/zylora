@@ -99,7 +99,7 @@ const OrderSuccess = () => {
             {order.orderItems.map((item, idx) => (
               <div key={idx} className="flex justify-between items-center text-sm">
                 <span className="text-gray-600">{item.name} x {item.quantity}</span>
-                <span className="font-bold">₹{item.price.toLocaleString()}</span>
+                <span className="font-bold">&#8377;{item.price.toLocaleString()}</span>
               </div>
             ))}
             <div className="flex justify-between items-center text-sm">
@@ -108,7 +108,7 @@ const OrderSuccess = () => {
             </div>
             <div className="pt-4 border-t border-gray-100 flex justify-between items-center">
               <span className="text-xs font-black uppercase tracking-widest text-gray-400">Total Amount</span>
-              <span className="text-xl font-black text-amber-500">₹{order.totalPrice.toLocaleString()}</span>
+              <span className="text-xl font-black text-amber-500">&#8377;{order.totalPrice.toLocaleString()}</span>
             </div>
           </div>
 
@@ -180,7 +180,7 @@ const OrderSuccess = () => {
                 <h4 className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">{prod.category}</h4>
                 <h3 className="text-xs font-bold text-gray-900 mb-2 truncate">{prod.name}</h3>
                 <div className="flex items-center justify-between">
-                  <span className="font-black text-xs">₹{prod.price.toLocaleString()}</span>
+                  <span className="font-black text-xs">&#8377;{prod.price.toLocaleString()}</span>
                   <div className="p-1.5 bg-gray-50 rounded-md group-hover:bg-[#0A1628] group-hover:text-white transition-colors">
                     <ShoppingCart size={12} />
                   </div>

@@ -201,7 +201,7 @@ const Negotiation = () => {
         const systemMsg = {
           id: Date.now(),
           sender: 'system',
-          text: `Deal status updated to: ${data.status} at ₹${data.price}`,
+          text: `Deal status updated to: ${data.status} at \u20B9${data.price}`,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           isSystem: true
         };
@@ -274,7 +274,7 @@ const Negotiation = () => {
     const systemMsg = {
       id: Date.now(),
       sender: 'system',
-      text: `You ${status === 'AGREED' ? 'accepted' : status === 'DECLINED' ? 'declined' : status === 'OFFER_SENT' ? 'sent a formal offer' : 'updated'} the deal at ₹${agreedPrice}`,
+      text: `You ${status === 'AGREED' ? 'accepted' : status === 'DECLINED' ? 'declined' : status === 'OFFER_SENT' ? 'sent a formal offer' : 'updated'} the deal at \u20B9${agreedPrice}`,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       isSystem: true
     };
@@ -338,7 +338,7 @@ const Negotiation = () => {
             </div>
           </div>
           <div className="text-right">
-            <div className="text-xl font-black text-gray-900">₹{product.price.toLocaleString()}</div>
+            <div className="text-xl font-black text-gray-900">&#8377;{product.price.toLocaleString()}</div>
             <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Qty: 1 Unit</div>
           </div>
         </div>
@@ -504,7 +504,7 @@ const Negotiation = () => {
                   <div className="group relative">
                     <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Final Agreed Price</div>
                     <div className="flex items-center gap-1 relative">
-                      <span className="text-2xl font-serif font-black text-gray-900">₹</span>
+                      <span className="text-2xl font-serif font-black text-gray-900">&#8377;</span>
                       <input 
                         type="number"
                         value={agreedPrice}
@@ -542,7 +542,7 @@ const Negotiation = () => {
                         {userRole === 'seller' ? 'Discount Offered' : 'Total Savings'}
                       </div>
                       <div className={`text-lg font-black ${userRole === 'seller' ? 'text-indigo-600' : 'text-green-600'}`}>
-                        ₹{(Math.abs(product.price - agreedPrice)).toFixed(2)} ({( ((product.price - agreedPrice)/product.price)*100 ).toFixed(1)}% {product.price > agreedPrice ? 'OFF' : 'ABOVE'})
+                        &#8377;{(Math.abs(product.price - agreedPrice)).toFixed(2)} ({( ((product.price - agreedPrice)/product.price)*100 ).toFixed(1)}% {product.price > agreedPrice ? 'OFF' : 'ABOVE'})
                       </div>
                     </div>
                     <div className={userRole === 'seller' ? 'text-indigo-500' : 'text-green-500'}>
@@ -595,21 +595,21 @@ const Negotiation = () => {
                       <div className="w-4 h-4 rounded-full bg-green-500 border-4 border-white shadow-sm z-10"></div>
                       <div>
                         <div className="text-[11px] font-black text-gray-900 leading-none">Deal Finalized</div>
-                        <div className="text-[9px] font-medium text-gray-400 mt-1 uppercase">10:55 AM • Seller accepted ₹{agreedPrice.toLocaleString()}</div>
+                        <div className="text-[9px] font-medium text-gray-400 mt-1 uppercase">10:55 AM • Seller accepted &#8377;{agreedPrice.toLocaleString()}</div>
                       </div>
                     </div>
                     <div className="flex gap-4 relative">
                       <div className="w-4 h-4 rounded-full bg-blue-500/20 border-4 border-white shadow-sm z-10"></div>
                       <div>
                         <div className="text-[11px] font-black text-gray-400 leading-none">Counter-offer sent</div>
-                        <div className="text-[9px] font-medium text-gray-400 mt-1 uppercase">10:52 AM • Buyer proposed ₹{agreedPrice.toLocaleString()}</div>
+                        <div className="text-[9px] font-medium text-gray-400 mt-1 uppercase">10:52 AM • Buyer proposed &#8377;{agreedPrice.toLocaleString()}</div>
                       </div>
                     </div>
                     <div className="flex gap-4 relative">
                       <div className="w-4 h-4 rounded-full bg-blue-500/20 border-4 border-white shadow-sm z-10"></div>
                       <div>
                         <div className="text-[11px] font-black text-gray-400 leading-none">Counter-offer received</div>
-                        <div className="text-[9px] font-medium text-gray-400 mt-1 uppercase">10:48 AM • Seller proposed ₹{(product.price * 0.95).toLocaleString()}</div>
+                        <div className="text-[9px] font-medium text-gray-400 mt-1 uppercase">10:48 AM • Seller proposed &#8377;{(product.price * 0.95).toLocaleString()}</div>
                       </div>
                     </div>
                   </div>
