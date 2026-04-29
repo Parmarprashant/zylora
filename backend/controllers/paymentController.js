@@ -1,11 +1,21 @@
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 
-// Initialize Razorpay
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET
-});
+// Helper to get Razorpay instance
+const getRazorpayInstance = () => {
+  const keyId = process.env.RAZORPAY_KEY_ID;
+  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+
+  if (!keyId || !keySecret) {
+    console.error('RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET is missing!');
+    return null;
+  }
+
+  return new Razorpay({
+    key_id: keyId,
+    key_secret: keySecret
+  });
+};
 
 // @desc    Create Razorpay Order
 // @route   POST /api/payments/razorpay/order
@@ -26,6 +36,14 @@ exports.createRazorpayOrder = async (req, res) => {
       currency,
       receipt: `receipt_${Date.now()}`
     };
+
+    const razorpay = getRazorpayInstance();
+    if (!razorpay) {
+      return res.status(500).json({
+        success: false,
+        error: 'Razorpay configuration error'
+      });
+    }
 
     const order = await razorpay.orders.create(options);
 
@@ -54,6 +72,14 @@ exports.verifyRazorpayPayment = async (req, res) => {
     } = req.body;
 
     const body = razorpay_order_id + "|" + razorpay_payment_id;
+
+    const razorpay = getRazorpayInstance();
+    if (!razorpay) {
+      return res.status(500).json({
+        success: false,
+        error: 'Razorpay configuration error'
+      });
+    }
 
     const expectedSignature = crypto
       .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
