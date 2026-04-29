@@ -215,7 +215,7 @@ const SellerOrders = () => {
                       </div>
                       <div className="rounded-xl bg-gray-50 p-4 border border-gray-100">
                         <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Seller Revenue</div>
-                        <div className="mt-2 text-2xl font-bold text-gray-900">₹{order.sellerTotal.toLocaleString()}</div>
+                        <div className="mt-2 text-2xl font-bold text-gray-900">&#8377;{order.sellerTotal.toLocaleString()}</div>
                       </div>
                     </div>
 
@@ -253,13 +253,13 @@ const SellerOrders = () => {
                             <div>
                               <h3 className="font-bold text-gray-900">{item.name}</h3>
                               <p className="text-xs text-gray-500 mt-1">Quantity: {item.quantity}</p>
-                              <p className="text-xs text-gray-500">Unit price: ₹{item.price.toLocaleString()}</p>
+                              <p className="text-xs text-gray-500">Unit price: &#8377;{item.price.toLocaleString()}</p>
                             </div>
                           </div>
 
                           <div className="text-left md:text-right">
                             <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Line Total</div>
-                            <div className="mt-1 text-lg font-bold text-gray-900">₹{(item.price * item.quantity).toLocaleString()}</div>
+                            <div className="mt-1 text-lg font-bold text-gray-900">&#8377;{(item.price * item.quantity).toLocaleString()}</div>
                           </div>
                         </div>
                       ))}

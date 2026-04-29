@@ -181,11 +181,11 @@ const SellerAuctions = () => {
                   <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-50 mb-4">
                     <div>
                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Base Price</p>
-                      <p className="text-sm font-bold text-gray-900">₹{auction.basePrice.toLocaleString()}</p>
+                      <p className="text-sm font-bold text-gray-900">&#8377;{auction.basePrice.toLocaleString()}</p>
                     </div>
                     <div>
                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1"><TrendingUp size={10} /> Current Bid</p>
-                      <p className="text-sm font-bold text-blue-600">₹{auction.currentBid.toLocaleString()}</p>
+                      <p className="text-sm font-bold text-blue-600">&#8377;{auction.currentBid.toLocaleString()}</p>
                     </div>
                   </div>
 
@@ -231,7 +231,7 @@ const SellerAuctions = () => {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 block">Starting Base Price (₹)</label>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 block">Starting Base Price (&#8377;)</label>
                 <input 
                   type="number" 
                   required

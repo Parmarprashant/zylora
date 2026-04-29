@@ -26,9 +26,9 @@ export const products = [
     ],
     storageOptions: ["6GB / 128GB", "8GB / 128GB"],
     bulkDeals: [
-      { range: "1 - 11 Units", price: "₹18,999", savings: "Retail" },
-      { range: "12 - 49 Units", price: "₹17,859", savings: "6% OFF", highlight: true },
-      { range: "50 - 99 Units", price: "₹17,100", savings: "10% OFF" },
+      { range: "1 - 11 Units", price: "\u20B918,999", savings: "Retail" },
+      { range: "12 - 49 Units", price: "\u20B917,859", savings: "6% OFF", highlight: true },
+      { range: "50 - 99 Units", price: "\u20B917,100", savings: "10% OFF" },
       { range: "100+ Units", price: "Negotiable", savings: "VIP Link" }
     ],
     description: "The Samsung Galaxy M34 5G features a stunning 6.5-inch Super AMOLED display with a 120Hz refresh rate, bringing every frame to life with vibrant colors and fluid motion. Whether you're streaming professional agriculture training videos or managing your auction listings, the Vision Booster ensures visibility even under direct sunlight.",
@@ -55,8 +55,8 @@ export const products = [
       platformRating: 4.8
     },
     frequentlyBought: [
-      { id: 101, name: "Galaxy Buds2 Pro", price: "₹8,999", img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?auto=format&fit=crop&q=80&w=200" },
-      { id: 102, name: "25W Fast Charger", price: "₹1,299", img: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&q=80&w=400" }
+      { id: 101, name: "Galaxy Buds2 Pro", price: "\u20B98,999", img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?auto=format&fit=crop&q=80&w=200" },
+      { id: 102, name: "25W Fast Charger", price: "\u20B91,299", img: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&q=80&w=400" }
     ],
     similarModels: [
       { id: 4, name: "Redmi Note 13 Pro", price: "23,999", discount: "17% OFF", img: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&q=80&w=400" },
@@ -89,8 +89,8 @@ export const products = [
     ],
     storageOptions: ["128GB", "256GB", "512GB"],
     bulkDeals: [
-      { range: "1 - 5 Units", price: "₹69,999", savings: "Retail" },
-      { range: "6 - 20 Units", price: "₹67,500", savings: "4% OFF", highlight: true },
+      { range: "1 - 5 Units", price: "\u20B969,999", savings: "Retail" },
+      { range: "6 - 20 Units", price: "\u20B967,500", savings: "4% OFF", highlight: true },
       { range: "21+ Units", price: "Negotiable", savings: "VIP" }
     ],
     description: "iPhone 15 brings you Dynamic Island, a 48MP Main camera, and USB-C, all in a durable color-infused glass and aluminum design.",
@@ -110,7 +110,7 @@ export const products = [
       platformRating: 5.0
     },
     frequentlyBought: [
-      { id: 201, name: "Apple MagSafe Case", price: "₹4,900", img: "https://images.unsplash.com/photo-1603313011101-31c23a4a5b2d?auto=format&fit=crop&q=80&w=200" }
+      { id: 201, name: "Apple MagSafe Case", price: "\u20B94,900", img: "https://images.unsplash.com/photo-1603313011101-31c23a4a5b2d?auto=format&fit=crop&q=80&w=200" }
     ],
     similarModels: [
       { id: 1, name: "Samsung Galaxy M34 5G", price: "18,999", discount: "24% OFF", img: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&q=80&w=400" }
@@ -134,8 +134,8 @@ export const products = [
     colors: [{ name: "Black", class: "bg-black" }],
     storageOptions: ["One Size"],
     bulkDeals: [
-      { range: "1-5 Units", price: "₹6,639", savings: "Retail" },
-      { range: "6-20 Units", price: "₹5,975", savings: "10% OFF", highlight: true }
+      { range: "1-5 Units", price: "\u20B96,639", savings: "Retail" },
+      { range: "6-20 Units", price: "\u20B95,975", savings: "10% OFF", highlight: true }
     ],
     description: "Experience superior sound quality with these wireless Bluetooth headphones, designed for comfort and portability for everyday use.",
     features: [
@@ -168,8 +168,8 @@ export const products = [
     colors: [{ name: "Denim Blue", class: "bg-blue-800" }],
     storageOptions: ["S", "M", "L", "XL"],
     bulkDeals: [
-      { range: "1-10 Units", price: "₹2,905", savings: "Retail" },
-      { range: "11-50 Units", price: "₹2,615", savings: "10% OFF", highlight: true }
+      { range: "1-10 Units", price: "\u20B92,905", savings: "Retail" },
+      { range: "11-50 Units", price: "\u20B92,615", savings: "10% OFF", highlight: true }
     ],
     description: "This stylish Men's Denim Jacket is perfect for any casual occasion. Crafted from high-quality denim, it features a classic fit.",
     features: [
@@ -202,8 +202,8 @@ export const products = [
     colors: [{ name: "Brown", class: "bg-amber-900" }],
     storageOptions: ["3-Seater"],
     bulkDeals: [
-      { range: "1-2 Units", price: "₹99,600", savings: "Retail" },
-      { range: "3+ Units", price: "₹89,640", savings: "10% OFF", highlight: true }
+      { range: "1-2 Units", price: "\u20B999,600", savings: "Retail" },
+      { range: "3+ Units", price: "\u20B989,640", savings: "10% OFF", highlight: true }
     ],
     description: "A stylish modern leather sofa that enhances the elegance of your living room while providing utmost comfort.",
     features: [
@@ -236,8 +236,8 @@ export const products = [
     colors: [{ name: "Black", class: "bg-black" }],
     storageOptions: ["Standard"],
     bulkDeals: [
-      { range: "1-5 Units", price: "₹290,500", savings: "Retail" },
-      { range: "6+ Units", price: "₹261,450", savings: "10% OFF", highlight: true }
+      { range: "1-5 Units", price: "\u20B9290,500", savings: "Retail" },
+      { range: "6+ Units", price: "\u20B9261,450", savings: "10% OFF", highlight: true }
     ],
     description: "This Foldable Electric Treadmill offers a convenient way to maintain fitness at home. Compact design perfect for home gyms.",
     features: [
@@ -276,8 +276,8 @@ export const products = [
     ],
     storageOptions: ["Standard"],
     bulkDeals: [
-      { range: "1 - 50 Units", price: "₹1,299", savings: "Retail" },
-      { range: "51 - 200 Units", price: "₹1,150", savings: "12% OFF", highlight: true },
+      { range: "1 - 50 Units", price: "\u20B91,299", savings: "Retail" },
+      { range: "51 - 200 Units", price: "\u20B91,150", savings: "12% OFF", highlight: true },
       { range: "201+ Units", price: "Negotiable", savings: "Bulk Link" }
     ],
     description: "Sleek, lightweight, and powerful. The boAt Airdopes 131 offers non-stop music for 12 hours with Type-C charging and IWP technology.",
@@ -323,8 +323,8 @@ export const products = [
     ],
     storageOptions: ["8GB / 256GB", "12GB / 256GB"],
     bulkDeals: [
-      { range: "1 - 10 Units", price: "₹23,999", savings: "Retail" },
-      { range: "11 - 50 Units", price: "₹22,500", savings: "6% OFF", highlight: true },
+      { range: "1 - 10 Units", price: "\u20B923,999", savings: "Retail" },
+      { range: "11 - 50 Units", price: "\u20B922,500", savings: "6% OFF", highlight: true },
       { range: "51+ Units", price: "Negotiable", savings: "VIP" }
     ],
     description: "The Redmi Note 13 Pro features a 200MP camera with OIS and a 1.5K AMOLED curved display, setting a new benchmark for mid-range flagships.",

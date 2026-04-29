@@ -266,7 +266,7 @@ const EarningsAnalytics = ({
           {/* Quick Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg">
             <div className="text-center">
-              <p className="text-2xl font-bold text-gray-900">₹{(totalRevenue || 0).toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900">&#8377;{(totalRevenue || 0).toLocaleString()}</p>
               <p className="text-xs text-gray-600 mt-1">Total Revenue</p>
             </div>
             <div className="text-center">

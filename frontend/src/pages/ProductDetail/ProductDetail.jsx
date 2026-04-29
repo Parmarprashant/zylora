@@ -90,7 +90,7 @@ const ProductDetail = () => {
               platformRating: '4.8'
             },
             bulkDeals: [
-              { range: '10-50 units', price: `₹${(p.price * 0.9).toLocaleString()}`, savings: '10% OFF', highlight: false },
+              { range: '10-50 units', price: `\u20B9${(p.price * 0.9).toLocaleString()}`, savings: '10% OFF', highlight: false },
               { range: '50-100 units', price: `₹${(p.price * 0.85).toLocaleString()}`, savings: '15% OFF', highlight: true },
               { range: '100+ units', price: `₹${(p.price * 0.8).toLocaleString()}`, savings: '20% OFF', highlight: false }
             ],
@@ -212,8 +212,8 @@ const ProductDetail = () => {
 
           <div className="mt-6 border-b border-gray-100 pb-6">
             <div className="flex items-baseline gap-3">
-              <span className="text-3xl font-bold">₹{product.price.toLocaleString()}</span>
-              <span className="text-lg text-gray-400 line-through">₹{product.oldPrice.toLocaleString()}</span>
+              <span className="text-3xl font-bold">&#8377;{product.price.toLocaleString()}</span>
+              <span className="text-lg text-gray-400 line-through">&#8377;{product.oldPrice.toLocaleString()}</span>
               <span className="text-green-600 font-bold">{product.discount}</span>
             </div>
             <div className="mt-2 flex items-center gap-2 text-sm text-green-600 font-semibold">
@@ -294,7 +294,7 @@ const ProductDetail = () => {
                 <div>
                   <span className="text-[10px] font-black text-red-400 uppercase tracking-widest block mb-1">Current Highest Bid</span>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-black text-gray-900">₹{activeAuction.currentBid.toLocaleString()}</span>
+                    <span className="text-3xl font-black text-gray-900">&#8377;{activeAuction.currentBid.toLocaleString()}</span>
                     <span className="text-xs font-bold text-gray-400">/ Unit</span>
                   </div>
                 </div>
@@ -508,7 +508,7 @@ const ProductDetail = () => {
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{product.brand}</span>
               <h3 className="font-bold text-sm mt-1">{prod.name}</h3>
               <div className="flex items-center gap-2 mt-2">
-                <span className="font-bold">₹{prod.price}</span>
+                <span className="font-bold">&#8377;{prod.price}</span>
                 <span className="text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded">{prod.discount}</span>
               </div>
             </div>
