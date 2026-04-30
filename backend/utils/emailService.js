@@ -2,12 +2,21 @@ const nodemailer = require('nodemailer');
 
 // Create a transporter using Gmail (you can use any email service)
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true, // Use SSL/TLS
   pool: true, // Use connection pool for efficiency
   auth: {
     user: process.env.EMAIL_USER || 'your-email@gmail.com',
     pass: process.env.EMAIL_PASSWORD || 'your-app-password'
-  }
+  },
+  tls: {
+    // do not fail on invalid certs
+    rejectUnauthorized: false
+  },
+  connectionTimeout: 10000, // 10 seconds timeout
+  greetingTimeout: 10000,
+  socketTimeout: 20000 // 20 seconds timeout for the socket
 });
 
 // Function to send winner notification email
