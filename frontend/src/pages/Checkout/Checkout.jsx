@@ -459,52 +459,24 @@ const Checkout = () => {
 
             {/* Payment Section */}
             <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
-              <h2 className="text-sm font-black uppercase tracking-widest text-gray-900 mb-8">Payment</h2>
+              <h2 className="text-sm font-black uppercase tracking-widest text-gray-900 mb-6">Payment Method</h2>
               
-              {/* Payment Tabs */}
-              <div className="flex border-b border-gray-100 mb-8">
-                {[
-                  { id: 'upi', label: 'UPI', icon: Wallet },
-                  { id: 'card', label: 'Card', icon: CreditCard },
-                  { id: 'netbanking', label: 'Net Banking', icon: Landmark },
-                  { id: 'emi', label: 'EMI', icon: CreditCard }
-                ].map((method) => (
-                  <button 
-                    key={method.id}
-                    onClick={() => setPaymentMethod(method.id)}
-                    className={`flex items-center gap-2 px-8 py-3 text-[10px] font-bold uppercase tracking-widest border-b-2 transition-all ${paymentMethod === method.id ? 'border-orange-500 text-orange-600 bg-orange-50/30' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
-                  >
-                    <method.icon size={16} />
-                    {method.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* UPI Tab Content */}
-              {paymentMethod === 'upi' && (
-                <div className="flex flex-col md:flex-row gap-8 items-start">
-                  <div className="flex-1 w-full">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Enter UPI ID</label>
-                    <div className="flex gap-2">
-                      <input type="text" placeholder="username@upi" className="flex-1 border border-gray-200 rounded-lg py-3 px-4 text-sm focus:outline-none focus:ring-1 focus:ring-blue-600" />
-                      <button className="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-blue-700 transition-colors">Verify</button>
-                    </div>
-                    <div className="mt-6 bg-blue-50 p-4 rounded-xl flex gap-3 items-center">
-                      <div className="bg-white p-1.5 rounded-full text-blue-600">
-                        <ShieldCheck size={16} />
-                      </div>
-                      <p className="text-[10px] text-blue-800 leading-tight">Your transaction is secured with end-to-end encryption.</p>
-                    </div>
-                  </div>
-                  
-                  <div className="w-full md:w-48 aspect-square border border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center p-4 bg-gray-50/50">
-                    <div className="w-24 h-24 bg-white p-2 rounded-xl shadow-sm mb-2">
-                      <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=ZyLoraPayment" alt="QR Code" className="w-full h-full grayscale opacity-30" />
-                    </div>
-                    <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest text-center">Scan to Pay using Any UPI App</p>
+              <div className="bg-blue-50 p-6 rounded-xl border border-blue-100 flex gap-4 items-start">
+                <div className="bg-white p-3 rounded-full text-blue-600 shrink-0 shadow-sm">
+                  <ShieldCheck size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xs font-black text-blue-900 uppercase tracking-widest mb-1">Secure Payment with Razorpay</h3>
+                  <p className="text-[11px] text-blue-800 leading-relaxed font-medium">
+                    You will be redirected to Razorpay's secure checkout to complete your payment. All major UPI apps, Credit/Debit cards, Net Banking, and Wallets are supported.
+                  </p>
+                  <div className="flex gap-3 mt-4">
+                    <span className="text-[9px] font-black uppercase tracking-widest bg-white text-blue-600 px-3 py-1 rounded-md border border-blue-100">UPI</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest bg-white text-blue-600 px-3 py-1 rounded-md border border-blue-100">Cards</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest bg-white text-blue-600 px-3 py-1 rounded-md border border-blue-100">Net Banking</span>
                   </div>
                 </div>
-              )}
+              </div>
             </div>
           </div>
 
@@ -553,9 +525,10 @@ const Checkout = () => {
 
                 <button 
                   onClick={handlePlaceOrder}
-                  className="w-full bg-orange-500 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-orange-600 transition-all shadow-xl shadow-orange-500/20 flex items-center justify-center gap-2"
+                  disabled={loading}
+                  className="w-full bg-orange-500 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-orange-600 transition-all shadow-xl shadow-orange-500/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Place Order & Pay &#8377;{stats.total.toLocaleString()} <ChevronRight size={16} />
+                  {loading ? 'Processing...' : `Place Order & Pay \u20B9${stats.total.toLocaleString()}`} <ChevronRight size={16} />
                 </button>
                 
                 <p className="text-[8px] text-gray-400 font-bold text-center mt-4 uppercase tracking-widest">
