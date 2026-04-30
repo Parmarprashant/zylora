@@ -173,8 +173,8 @@ io.on('connection', (socket) => {
               }
             );
 
-            // Emit to the specific negotiation room
-            io.to(`${data.productId}_${targetBuyerId}`).emit('deal_update', {
+            // Emit to the specific negotiation room (excluding sender)
+            socket.to(`${data.productId}_${targetBuyerId}`).emit('deal_update', {
               status: data.status,
               price: data.price,
               sender: data.sender
@@ -240,6 +240,32 @@ app.use('/api/cart', cart);
 app.use('/api/negotiation', negotiation);
 app.use('/api/auctions', auctions);
 app.use('/api/payments', payments);
+
+// AI Proxy for CORS bypass
+app.post('/api/ai-proxy', async (req, res) => {
+  try {
+    const { url, body } = req.body;
+    
+    if (!url || !url.startsWith('https://integrate.api.nvidia.com')) {
+       return res.status(403).json({ error: 'Proxy not allowed for this URL' });
+    }
+    
+    const response = await fetch(url, {
+       method: 'POST',
+       headers: {
+         'Content-Type': 'application/json',
+         'Authorization': req.headers.authorization
+       },
+       body: JSON.stringify(body)
+    });
+    
+    const data = await response.json().catch(() => ({}));
+    res.status(response.status).json(data);
+  } catch (error) {
+    console.error('AI Proxy Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 const PORT = process.env.PORT || 5000;
 

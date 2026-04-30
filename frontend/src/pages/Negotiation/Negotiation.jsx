@@ -197,11 +197,15 @@ const Negotiation = () => {
       if (data.status) {
         setDealStatus(data.status);
         
+        if (data.price !== undefined) {
+          setAgreedPrice(data.price);
+        }
+        
         // Add a system message to the chat
         const systemMsg = {
           id: Date.now(),
           sender: 'system',
-          text: `Deal status updated to: ${data.status} at \u20B9${data.price}`,
+          text: `The other party ${data.status === 'AGREED' ? 'accepted' : data.status === 'DECLINED' ? 'declined' : data.status === 'OFFER_SENT' ? 'sent an offer' : 'countered'} the deal at \u20B9${data.price}`,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           isSystem: true
         };
@@ -274,7 +278,7 @@ const Negotiation = () => {
     const systemMsg = {
       id: Date.now(),
       sender: 'system',
-      text: `You ${status === 'AGREED' ? 'accepted' : status === 'DECLINED' ? 'declined' : status === 'OFFER_SENT' ? 'sent a formal offer' : 'updated'} the deal at \u20B9${agreedPrice}`,
+      text: `You ${status === 'AGREED' ? 'accepted' : status === 'DECLINED' ? 'declined' : (status === 'OFFER_SENT' || status === 'COUNTERED') ? 'sent a formal offer for' : 'updated'} the deal at \u20B9${agreedPrice}`,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       isSystem: true
     };
@@ -506,10 +510,12 @@ const Negotiation = () => {
                     <div className="flex items-center gap-1 relative">
                       <span className="text-2xl font-serif font-black text-gray-900">&#8377;</span>
                       <input 
-                        type="number"
+                        type="text"
                         value={agreedPrice}
+                        disabled={dealStatus === 'AGREED' || dealStatus === 'DECLINED'}
                         onChange={(e) => {
-                          const newPrice = Number(e.target.value);
+                          const val = e.target.value.replace(/\D/g, '');
+                          const newPrice = Number(val);
                           setAgreedPrice(newPrice);
                           if (socket.current) {
                             const searchParams = new URLSearchParams(window.location.search);
@@ -522,14 +528,15 @@ const Negotiation = () => {
                             });
                           }
                         }}
-                        className="w-full text-4xl font-serif font-black tracking-tighter text-gray-900 focus:outline-none focus:ring-0 bg-transparent border-none p-0 appearance-none m-0"
-                        style={{ MozAppearance: 'textfield' }}
+                        className={`w-full text-4xl font-serif font-black tracking-tighter ${dealStatus === 'AGREED' ? 'text-gray-500' : 'text-gray-900'} focus:outline-none focus:ring-0 bg-transparent border-none p-0 m-0`}
                       />
-                      <div className="absolute right-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Edit2 size={14} className="text-gray-300" />
-                      </div>
+                      {dealStatus !== 'AGREED' && dealStatus !== 'DECLINED' && (
+                        <div className="absolute right-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Edit2 size={14} className="text-gray-300" />
+                        </div>
+                      )}
                     </div>
-                    <div className="h-[2px] w-full bg-gray-100 group-focus-within:bg-blue-600 transition-colors mt-1"></div>
+                    <div className={`h-[2px] w-full ${dealStatus === 'AGREED' ? 'bg-gray-100' : 'bg-gray-100 group-focus-within:bg-blue-600'} transition-colors mt-1`}></div>
                   </div>
   
                   <div className={`rounded-xl p-4 flex items-center justify-between border ${
@@ -552,31 +559,68 @@ const Negotiation = () => {
   
                 <div className="space-y-3 pt-4">
                   {userRole === 'buyer' ? (
-                    <button 
-                      type="button"
-                      onClick={() => {
-                        if (dealStatus === 'AGREED') {
-                          navigate('/checkout', { state: { price: agreedPrice, product: product } });
-                        } else {
-                          handleUpdateDealStatus('AGREED');
-                          // Also navigate immediately after agreeing
-                          setTimeout(() => {
+                    <>
+                      {dealStatus === 'AGREED' ? (
+                        <button 
+                          type="button"
+                          onClick={() => {
                             navigate('/checkout', { state: { price: agreedPrice, product: product } });
-                          }, 500);
-                        }
-                      }}
-                      className="w-full bg-[#10B981] text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#059669] transition-all shadow-lg shadow-green-500/20"
-                    >
-                      <ShoppingCart size={16} /> {dealStatus === 'AGREED' ? 'Proceed to Pay' : 'Accept & Proceed'}
-                    </button>
+                          }}
+                          className="w-full bg-[#10B981] text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#059669] transition-all shadow-lg shadow-green-500/20"
+                        >
+                          <ShoppingCart size={16} /> Proceed to Pay
+                        </button>
+                      ) : dealStatus === 'OFFER_SENT' ? (
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            handleUpdateDealStatus('AGREED');
+                            setTimeout(() => {
+                              navigate('/checkout', { state: { price: agreedPrice, product: product } });
+                            }, 500);
+                          }}
+                          className="w-full bg-[#10B981] text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#059669] transition-all shadow-lg shadow-green-500/20"
+                        >
+                          <ShoppingCart size={16} /> Accept Seller's Offer & Pay
+                        </button>
+                      ) : (
+                        <button 
+                          type="button"
+                          disabled={true}
+                          className="w-full bg-gray-200 text-gray-500 py-4 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2"
+                        >
+                          Waiting for Seller's Agreement
+                        </button>
+                      )}
+                    </>
                   ) : (
-                    <button 
-                      type="button"
-                      onClick={() => handleUpdateDealStatus('AGREED')}
-                      className="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20"
-                    >
-                      <CheckCircle size={16} /> Confirm Offer to Buyer
-                    </button>
+                    <>
+                      {dealStatus === 'COUNTERED' ? (
+                        <button 
+                          type="button"
+                          onClick={() => handleUpdateDealStatus('AGREED')}
+                          className="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20"
+                        >
+                          <CheckCircle size={16} /> Accept Buyer's Offer
+                        </button>
+                      ) : dealStatus === 'AGREED' ? (
+                        <button 
+                          type="button"
+                          disabled={true}
+                          className="w-full bg-green-100 text-green-700 py-4 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2"
+                        >
+                          <CheckCircle size={16} /> Deal Agreed
+                        </button>
+                      ) : (
+                         <button 
+                          type="button"
+                          disabled={true}
+                          className="w-full bg-gray-200 text-gray-500 py-4 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2"
+                        >
+                          Waiting for Buyer's Response
+                        </button>
+                      )}
+                    </>
                   )}
                   <button 
                     type="button"
@@ -591,27 +635,45 @@ const Negotiation = () => {
                 <div className="pt-8 border-t border-gray-100">
                   <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Negotiation Log</div>
                   <div className="space-y-6 relative before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-[2px] before:bg-gray-100">
-                    <div className="flex gap-4 relative">
-                      <div className="w-4 h-4 rounded-full bg-green-500 border-4 border-white shadow-sm z-10"></div>
-                      <div>
-                        <div className="text-[11px] font-black text-gray-900 leading-none">Deal Finalized</div>
-                        <div className="text-[9px] font-medium text-gray-400 mt-1 uppercase">10:55 AM • Seller accepted &#8377;{agreedPrice.toLocaleString()}</div>
+                    {messages.filter(m => m.isSystem).length > 0 ? (
+                      messages.filter(m => m.isSystem).reverse().map((log) => {
+                        const logTextLower = log.text.toLowerCase();
+                        const isAgreed = logTextLower.includes('accepted') || logTextLower.includes('agreed');
+                        const isDeclined = logTextLower.includes('declined');
+                        const isCounter = logTextLower.includes('countered');
+                        
+                        let title = 'Offer Sent';
+                        if (isAgreed) title = 'Deal Finalized';
+                        if (isDeclined) title = 'Deal Declined';
+                        if (isCounter) title = 'Counter-offer';
+
+                        return (
+                          <div key={log.id} className="flex gap-4 relative">
+                            <div className={`w-4 h-4 rounded-full border-4 border-white shadow-sm z-10 ${
+                              isAgreed ? 'bg-green-500' : isDeclined ? 'bg-red-500' : 'bg-blue-500/50'
+                            }`}></div>
+                            <div>
+                              <div className="text-[11px] font-black text-gray-900 leading-none">
+                                {title}
+                              </div>
+                              <div className="text-[9px] font-medium text-gray-400 mt-1 uppercase">
+                                {log.time} • {log.text}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="flex gap-4 relative">
+                        <div className="w-4 h-4 rounded-full bg-amber-500 border-4 border-white shadow-sm z-10"></div>
+                        <div>
+                          <div className="text-[11px] font-black text-gray-900 leading-none">Negotiation Started</div>
+                          <div className="text-[9px] font-medium text-gray-400 mt-1 uppercase">
+                            Status: {dealStatus} • Price: &#8377;{agreedPrice.toLocaleString()}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex gap-4 relative">
-                      <div className="w-4 h-4 rounded-full bg-blue-500/20 border-4 border-white shadow-sm z-10"></div>
-                      <div>
-                        <div className="text-[11px] font-black text-gray-400 leading-none">Counter-offer sent</div>
-                        <div className="text-[9px] font-medium text-gray-400 mt-1 uppercase">10:52 AM • Buyer proposed &#8377;{agreedPrice.toLocaleString()}</div>
-                      </div>
-                    </div>
-                    <div className="flex gap-4 relative">
-                      <div className="w-4 h-4 rounded-full bg-blue-500/20 border-4 border-white shadow-sm z-10"></div>
-                      <div>
-                        <div className="text-[11px] font-black text-gray-400 leading-none">Counter-offer received</div>
-                        <div className="text-[9px] font-medium text-gray-400 mt-1 uppercase">10:48 AM • Seller proposed &#8377;{(product.price * 0.95).toLocaleString()}</div>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
