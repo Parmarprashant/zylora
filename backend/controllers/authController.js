@@ -189,7 +189,7 @@ exports.deleteAddress = async (req, res) => {
     }
 
     const wasSelected = address.selected;
-    address.remove();
+    address.deleteOne();
     
     // If we deleted the selected address and have others, select the first one
     if (wasSelected && user.addresses.length > 0) {

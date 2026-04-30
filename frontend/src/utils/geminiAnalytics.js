@@ -3,9 +3,8 @@
  * Analyzes seller data and provides AI-powered recommendations
  */
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const API_VERSIONS = ['v1beta'];
-const MODELS = ['gemini-2.5-flash', 'gemini-2.5-pro'];
+const NVIDIA_API_KEY = import.meta.env.VITE_NVIDIA_API_KEY;
+const MODELS = ['meta/llama-3.1-70b-instruct', 'meta/llama3-70b-instruct', 'mistralai/mixtral-8x7b-instruct-v0.1'];
 
 /**
  * Cache key format: seller_id_week_number or seller_id_day_number
@@ -115,7 +114,7 @@ Format your response as clear sections with bullet points. Be specific and data-
 };
 
 /**
- * Call Gemini API for business analysis with multiple fallbacks
+ * Call NVIDIA API for business analysis with multiple fallbacks
  */
 export const analyzeSellerData = async (sellerData, sellerId = 'default', frequencyType = 'weekly') => {
   try {
@@ -133,65 +132,71 @@ export const analyzeSellerData = async (sellerData, sellerId = 'default', freque
     const prompt = buildAnalysisPrompt(sellerData);
     let lastError = null;
 
-    // Try different version and model combinations
-    for (const version of API_VERSIONS) {
-      for (const model of MODELS) {
-        const url = `https://generativelanguage.googleapis.com/${version}/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+    // Try different models
+    for (const model of MODELS) {
+      const url = `https://integrate.api.nvidia.com/v1/chat/completions`;
+      
+      try {
+        console.log(`Attempting NVIDIA analysis with ${model}...`);
         
-        try {
-          console.log(`Attempting Gemini analysis with ${model} (${version})...`);
-          const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              contents: [{
-                parts: [{
-                  text: prompt
-                }]
+        const BACKEND_URL = window.location.hostname === 'localhost' 
+          ? 'http://localhost:5001' 
+          : 'https://zylora-e-commerce.onrender.com';
+
+        const response = await fetch(`${BACKEND_URL}/api/ai-proxy`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${NVIDIA_API_KEY}`
+          },
+          body: JSON.stringify({
+            url: url,
+            body: {
+              model: model,
+              messages: [{
+                role: 'user',
+                content: prompt
               }]
-            })
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            
-            if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-              const analysis = data.candidates[0].content.parts[0].text;
-              
-              // Cache the analysis
-              saveAnalysisToCache(sellerId, analysis, frequencyType);
-
-              return {
-                success: true,
-                analysis: analysis,
-                fromCache: false,
-                timestamp: new Date().toISOString(),
-                modelUsed: `${model} (${version})`
-              };
             }
-          } else {
-            const errorData = await response.json().catch(() => ({}));
-            console.warn(`Gemini ${model} (${version}) failed: ${response.status}`, errorData);
-            lastError = `API error: ${response.status} ${response.statusText}`;
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data.choices && data.choices[0]?.message?.content) {
+            const analysis = data.choices[0].message.content;
             
-            // If we hit a rate limit, don't spam the other models/versions
-            if (response.status === 429) {
-              lastError = "Rate limit exceeded. Please wait a minute before trying again.";
-              throw new Error(lastError);
-            }
+            // Cache the analysis
+            saveAnalysisToCache(sellerId, analysis, frequencyType);
+
+            return {
+              success: true,
+              analysis: analysis,
+              fromCache: false,
+              timestamp: new Date().toISOString(),
+              modelUsed: model
+            };
           }
-        } catch (err) {
-          console.error(`Fetch error for ${model} (${version}):`, err);
-          lastError = err.message;
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          console.warn(`NVIDIA ${model} failed: ${response.status}`, errorData);
+          lastError = errorData?.error?.message || `API error: ${response.status} ${response.statusText}`;
+          
+          // Stop trying other models if it's an auth or quota error
+          if (response.status === 401 || response.status === 429) {
+            throw new Error(lastError);
+          }
         }
+      } catch (err) {
+        console.error(`Fetch error for ${model}:`, err);
+        lastError = err.message;
       }
     }
 
-    throw new Error(lastError || 'All Gemini API attempts failed');
+    throw new Error(lastError || 'All NVIDIA API attempts failed');
   } catch (error) {
-    console.error('Error calling Gemini API:', error);
+    console.error('Error calling NVIDIA API:', error);
     return {
       success: false,
       error: error.message,
