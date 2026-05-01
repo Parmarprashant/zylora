@@ -21,6 +21,10 @@ const negotiationSchema = new mongoose.Schema({
     enum: ['PENDING', 'ACCEPTED', 'COUNTERED', 'OFFER_SENT', 'AGREED', 'DECLINED'],
     default: 'PENDING'
   },
+  quantity: {
+    type: Number,
+    default: 1
+  },
   agreedPrice: {
     type: Number,
     default: 0

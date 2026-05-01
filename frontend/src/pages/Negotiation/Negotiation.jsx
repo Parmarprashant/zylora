@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Send, Phone, Video, Check, 
   Paperclip, ShieldCheck, Edit2, CheckCircle,
-  Info, ShoppingCart, Tag, Bell, AlertTriangle, X
+  Info, ShoppingCart, Tag, Bell, AlertTriangle, X,
+  Minus, Plus
 } from 'lucide-react';
 import { useNavigate, Link, useParams } from 'react-router-dom';
 import { products } from '../../data/products';
@@ -19,15 +20,25 @@ const Negotiation = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   
+  // User Data
+  const userData = sessionStorage.getItem('user');
+  const user = userData ? JSON.parse(userData) : null;
+  const currentUserId = user?._id || user?.id;
+  
   const [messages, setMessages] = useState([]);
 
   const [newMessage, setNewMessage] = useState('');
-  const [dealStatus, setDealStatus] = useState(null); // null until fetched, then PENDING, ACCEPTED, etc.
+  const [quantity, setQuantity] = useState(1);
+  const [dealStatus, setDealStatus] = useState('PENDING'); // null until fetched, then PENDING, ACCEPTED, etc.
   const [agreedPrice, setAgreedPrice] = useState(0);
   const chatEndRef = useRef(null);
   const socket = useRef(null);
   const [userRole, setUserRole] = useState('buyer');
   const isSeller = userRole === 'seller';
+  
+  // Cooldown State
+  const [cooldownTimeLeft, setCooldownTimeLeft] = useState(0);
+  const [lastDeclinedAt, setLastDeclinedAt] = useState(null);
 
   // Emergency Buzzer State
   const [buzzerCooldown, setBuzzerCooldown] = useState(false);
@@ -73,30 +84,17 @@ const Negotiation = () => {
   const userRoleRef = useRef('buyer');
 
   useEffect(() => {
-    // Improved user data parsing with fallback
-    const userData = sessionStorage.getItem('user');
-    let user = null;
-    try {
-      user = userData ? JSON.parse(userData) : null;
-    } catch (err) {
-      console.error('Error parsing user data:', err);
-    }
-
-    let currentUserId = null;
     if (user) {
-      const role = user.role || 'buyer';
-      setUserRole(role);
-      userRoleRef.current = role;
-      currentUserId = user._id || user.id;
+      setUserRole(user.role || 'buyer');
+      userRoleRef.current = user.role || 'buyer';
     } else {
-      // Fallback if no user is found
       setUserRole('buyer');
       userRoleRef.current = 'buyer';
     }
 
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 
-      (window.location.hostname === 'localhost' 
-        ? 'http://localhost:5001' 
+      ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') || window.location.hostname === '127.0.0.1'
+        ? 'http://127.0.0.1:5001' 
         : 'https://zylora-e-commerce.onrender.com');
 
     const fetchProductAndChat = async () => {
@@ -140,11 +138,15 @@ const Negotiation = () => {
           if (chatRes.data.success) {
             if (chatRes.data.negotiation) {
               setDealStatus(chatRes.data.negotiation.status);
-              if (chatRes.data.negotiation.agreedPrice) {
-                setAgreedPrice(chatRes.data.negotiation.agreedPrice);
+              setAgreedPrice(chatRes.data.negotiation.agreedPrice || currentProduct.price);
+              setQuantity(chatRes.data.negotiation.quantity || 1);
+              if (chatRes.data.negotiation.status === 'DECLINED') {
+                setLastDeclinedAt(chatRes.data.negotiation.updatedAt || chatRes.data.negotiation.lastMessageAt);
               }
             } else {
               setDealStatus('NEW');
+              setAgreedPrice(currentProduct.price);
+              setQuantity(1);
             }
 
             if (chatRes.data.data.length > 0) {
@@ -178,12 +180,25 @@ const Negotiation = () => {
     };
 
     fetchProductAndChat();
+  }, [id, navigate]);
 
-    // Initialize socket
+  // Socket initialization and listeners
+  useEffect(() => {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 
+      ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') || window.location.hostname === '127.0.0.1'
+        ? 'http://127.0.0.1:5001' 
+        : 'https://zylora-e-commerce.onrender.com');
+
+    const userData = sessionStorage.getItem('user');
+    let user = null;
+    try {
+      user = userData ? JSON.parse(userData) : null;
+    } catch (err) {}
+    const currentUserId = user?._id || user?.id;
+
     socket.current = io(BACKEND_URL);
 
     socket.current.on('connect', () => {
-      console.log('Connected to WebSocket server');
       const searchParams = new URLSearchParams(window.location.search);
       const targetBuyerId = searchParams.get('buyerId') || (userRoleRef.current === 'buyer' ? currentUserId : null);
       
@@ -194,21 +209,13 @@ const Negotiation = () => {
     });
 
     socket.current.on('receive_message', (message) => {
-      console.log('Message received from socket:', message);
-      
       const user = JSON.parse(sessionStorage.getItem('user') || '{}');
       const currentId = user?._id || user?.id;
       const isMe = message.sender === currentId;
-      
-      // If it's me, and we already added it locally, don't add again
-      // (socket.to(room) shouldn't send to sender, but just in case of multiple tabs)
-      
-      const displaySender = isMe ? 'you' : (message.senderRole || (userRole === 'seller' ? 'buyer' : 'seller'));
+      const displaySender = isMe ? 'you' : (message.senderRole || (userRoleRef.current === 'seller' ? 'buyer' : 'seller'));
 
       setMessages(prev => {
-        // Prevent duplicates if already added locally
         if (prev.some(m => m.id === message.id)) return prev;
-        
         return [...prev, {
           id: message.id || Date.now(),
           sender: displaySender,
@@ -222,26 +229,26 @@ const Negotiation = () => {
     });
 
     socket.current.on('price_update', (data) => {
-      console.log('Price update received:', data);
-      if (data.agreedPrice !== undefined) {
-        setAgreedPrice(data.agreedPrice);
-      }
+      if (data.agreedPrice !== undefined) setAgreedPrice(data.agreedPrice);
+      if (data.quantity !== undefined) setQuantity(data.quantity);
     });
 
     socket.current.on('deal_update', (data) => {
-      console.log('Deal update received:', data);
       if (data.status) {
         setDealStatus(data.status);
-        
-        if (data.price !== undefined) {
-          setAgreedPrice(data.price);
+        if (data.status === 'DECLINED') {
+          setLastDeclinedAt(new Date().toISOString());
+        } else {
+          setLastDeclinedAt(null);
+          setCooldownTimeLeft(0);
         }
+        if (data.price !== undefined) setAgreedPrice(data.price);
+        if (data.quantity !== undefined) setQuantity(data.quantity);
         
-        // Add a system message to the chat
         const systemMsg = {
           id: Date.now(),
           sender: 'system',
-          text: `The other party ${data.status === 'AGREED' ? 'accepted' : data.status === 'DECLINED' ? 'declined' : data.status === 'OFFER_SENT' ? 'sent an offer' : 'countered'} the deal at \u20B9${data.price}`,
+          text: `${data.sender === 'seller' ? 'Seller' : 'Buyer'} ${data.status === 'AGREED' ? 'accepted' : data.status === 'DECLINED' ? 'declined' : (data.status === 'OFFER_SENT' || data.status === 'COUNTERED') ? 'sent a formal offer for' : 'updated'} the deal at \u20B9${Math.round(data.price * (data.quantity || 1)).toLocaleString()}`,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           isSystem: true
         };
@@ -249,24 +256,13 @@ const Negotiation = () => {
       }
     });
 
-    // Listen for incoming urgent buzz
     socket.current.on('urgent_buzz', (data) => {
-      console.log('🚨 URGENT BUZZ RECEIVED:', data);
       setIncomingBuzz(data);
-
-      // Play buzzer sound using pre-warmed AudioContext
+      
       const playBuzzerSound = async () => {
         try {
-          let ctx = audioCtxRef.current;
-          if (!ctx) {
-            ctx = new (window.AudioContext || window.webkitAudioContext)();
-            audioCtxRef.current = ctx;
-          }
-          // Resume if suspended
-          if (ctx.state === 'suspended') {
-            await ctx.resume();
-          }
-
+          let ctx = audioCtxRef.current || new (window.AudioContext || window.webkitAudioContext)();
+          if (ctx.state === 'suspended') await ctx.resume();
           const playTone = (freq, startTime, duration) => {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
@@ -279,8 +275,6 @@ const Negotiation = () => {
             osc.start(startTime);
             osc.stop(startTime + duration);
           };
-
-          // Urgent alarm: 3 bursts of rapid alternating tones
           const now = ctx.currentTime;
           for (let burst = 0; burst < 3; burst++) {
             const offset = burst * 0.7;
@@ -289,41 +283,39 @@ const Negotiation = () => {
               playTone(660, now + offset + i * 0.12 + 0.06, 0.1);
             }
           }
-        } catch (e) {
-          console.log('Audio playback failed:', e);
-        }
+        } catch (e) {}
       };
       playBuzzerSound();
 
-      // Vibrate if supported (mobile)
-      if (navigator.vibrate) {
-        navigator.vibrate([200, 100, 200, 100, 400]);
-      }
-
-      // Flash browser tab title
-      const originalTitle = document.title;
-      let flashCount = 0;
-      const titleFlash = setInterval(() => {
-        document.title = flashCount % 2 === 0 ? '🚨 URGENT BUZZ!' : originalTitle;
-        flashCount++;
-        if (flashCount > 12) {
-          clearInterval(titleFlash);
-          document.title = originalTitle;
-        }
-      }, 600);
-
-      // Auto-dismiss after 8 seconds
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
       setTimeout(() => setIncomingBuzz(null), 8000);
     });
 
     return () => {
       if (socket.current) socket.current.disconnect();
     };
-  }, [id, userRole]);
+  }, [id]);
 
-  const handleSendMessage = (e) => {
-    e.preventDefault();
-    if (!newMessage.trim()) return;
+  // Cooldown timer
+  useEffect(() => {
+    let timer;
+    if (dealStatus === 'DECLINED' && lastDeclinedAt) {
+      timer = setInterval(() => {
+        const declinedTime = new Date(lastDeclinedAt).getTime();
+        const now = new Date().getTime();
+        const diffSeconds = Math.floor((now - declinedTime) / 1000);
+        const remaining = Math.max(0, 300 - diffSeconds);
+        setCooldownTimeLeft(remaining);
+      }, 1000);
+    } else {
+      setCooldownTimeLeft(0);
+    }
+    return () => clearInterval(timer);
+  }, [dealStatus, lastDeclinedAt]);
+
+  const handleSendMessage = (e, textToSubmit = newMessage, type = 'text') => {
+    if (e) e.preventDefault();
+    if (!textToSubmit.trim()) return;
 
     const user = JSON.parse(sessionStorage.getItem('user'));
     const senderId = user?._id || user?.id;
@@ -343,14 +335,17 @@ const Negotiation = () => {
     const targetBuyerId = searchParams.get('buyerId');
 
     if (socket.current) {
-      socket.current.emit('send_message', {
+      const messageData = {
         productId: id,
-        text: newMessage,
-        senderId: senderId,
+        senderId: currentUserId,
+        senderRole: userRole,
         buyerId: targetBuyerId,
-        senderRole: user?.role || 'buyer',
-        type: 'text'
-      });
+        text: textToSubmit,
+        type: type,
+        offerPrice: type === 'offer' ? agreedPrice : undefined,
+        quantity: quantity
+      };
+      socket.current.emit('send_message', messageData);
     }
 
     setNewMessage('');
@@ -412,6 +407,7 @@ const Negotiation = () => {
         productId: id,
         status: status,
         price: agreedPrice,
+        quantity: quantity,
         sender: userRole,
         senderRole: userRole,
         buyerId: effectiveBuyerId,
@@ -423,7 +419,7 @@ const Negotiation = () => {
     const systemMsg = {
       id: Date.now(),
       sender: 'system',
-      text: `You ${status === 'AGREED' ? 'accepted' : status === 'DECLINED' ? 'declined' : (status === 'OFFER_SENT' || status === 'COUNTERED') ? 'sent a formal offer for' : 'updated'} the deal at \u20B9${agreedPrice}`,
+      text: `You ${status === 'AGREED' ? 'accepted' : status === 'DECLINED' ? 'declined' : (status === 'OFFER_SENT' || status === 'COUNTERED') ? 'sent a formal offer for' : 'updated'} the deal at \u20B9${Math.round(agreedPrice * quantity).toLocaleString()}`,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       isSystem: true
     };
@@ -562,8 +558,48 @@ const Negotiation = () => {
             </div>
           </div>
           <div className="text-right">
-            <div className="text-xl font-black text-gray-900">&#8377;{product.price.toLocaleString()}</div>
-            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Qty: 1 Unit</div>
+            <div className="text-xl font-black text-gray-900">&#8377;{(product.price * quantity).toLocaleString()}</div>
+            <div className="flex items-center gap-2 mt-2 justify-end">
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mr-2">Quantity:</div>
+              <div className="flex items-center bg-gray-100 rounded-lg p-1 border border-gray-200">
+                <button 
+                  onClick={() => {
+                    if (quantity > 1) {
+                      const newQty = quantity - 1;
+                      setQuantity(newQty);
+                      if (socket.current) {
+                        const searchParams = new URLSearchParams(window.location.search);
+                        const targetBuyerId = searchParams.get('buyerId') || (userRole === 'buyer' ? JSON.parse(sessionStorage.getItem('user'))?._id : null);
+                        socket.current.emit('price_update', { productId: id, buyerId: targetBuyerId, quantity: newQty, agreedPrice: agreedPrice });
+                      }
+                    }
+                  }}
+                  disabled={dealStatus === 'AGREED' || (dealStatus === 'DECLINED' && cooldownTimeLeft > 0) || userRole === 'seller'}
+                  className={`p-1 rounded-md transition-colors ${userRole === 'seller' || (dealStatus === 'DECLINED' && cooldownTimeLeft > 0) ? 'cursor-not-allowed text-gray-300' : 'hover:bg-white text-gray-600 hover:text-blue-600'}`}
+                >
+                  <Minus size={12} />
+                </button>
+                <span className="w-8 text-center text-xs font-black text-gray-900">{quantity}</span>
+                <button 
+                  onClick={() => {
+                    const newQty = quantity + 1;
+                    setQuantity(newQty);
+                    if (socket.current) {
+                      const searchParams = new URLSearchParams(window.location.search);
+                      const targetBuyerId = searchParams.get('buyerId') || (userRole === 'buyer' ? JSON.parse(sessionStorage.getItem('user'))?._id : null);
+                      socket.current.emit('price_update', { productId: id, buyerId: targetBuyerId, quantity: newQty, agreedPrice: agreedPrice });
+                    }
+                  }}
+                  disabled={dealStatus === 'AGREED' || (dealStatus === 'DECLINED' && cooldownTimeLeft > 0) || userRole === 'seller'}
+                  className={`p-1 rounded-md transition-colors ${userRole === 'seller' || (dealStatus === 'DECLINED' && cooldownTimeLeft > 0) ? 'cursor-not-allowed text-gray-300' : 'hover:bg-white text-gray-600 hover:text-blue-600'}`}
+                >
+                  <Plus size={12} />
+                </button>
+              </div>
+            </div>
+            <div className="text-[9px] font-bold text-blue-500 uppercase tracking-tighter mt-1">
+              &#8377;{product.price.toLocaleString()} per unit
+            </div>
           </div>
         </div>
 
@@ -675,7 +711,7 @@ const Negotiation = () => {
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         placeholder={(dealStatus === 'NEW' && userRole === 'buyer') ? "Send a message to start negotiating..." : "Type your message..."}
-                        disabled={dealStatus === 'DECLINED'}
+                        disabled={dealStatus === 'DECLINED' && cooldownTimeLeft > 0}
                         className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all disabled:opacity-50"
                       />
                       <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -691,7 +727,7 @@ const Negotiation = () => {
                     </button>
 
                     {/* Emergency Buzz Button — Buyer Only */}
-                    {userRole === 'buyer' && dealStatus !== 'DECLINED' && (
+                    {userRole === 'buyer' && (dealStatus !== 'DECLINED' || cooldownTimeLeft <= 0) && (
                       <button
                         type="button"
                         onClick={handleEmergencyBuzz}
@@ -727,7 +763,7 @@ const Negotiation = () => {
                         ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-500/20' 
                         : 'bg-amber-500 text-white hover:bg-amber-600 shadow-amber-500/20'
                     }`}>
-                      <ShieldCheck size={16} /> {userRole === 'seller' ? 'Send Formal Offer' : 'Send Formal Offer'}
+                      <ShieldCheck size={16} /> {userRole === 'seller' ? `Send Formal Offer (\u20B9${Math.round(agreedPrice * quantity).toLocaleString()})` : `Send Formal Offer (\u20B9${Math.round(agreedPrice * quantity).toLocaleString()})`}
                     </button>
                   )}
                 </>
@@ -758,26 +794,28 @@ const Negotiation = () => {
                       <span className="text-2xl font-serif font-black text-gray-900">&#8377;</span>
                       <input 
                         type="text"
-                        value={agreedPrice}
-                        disabled={dealStatus === 'AGREED' || dealStatus === 'DECLINED'}
+                        value={Math.round(agreedPrice * quantity)}
+                        disabled={dealStatus === 'AGREED' || (dealStatus === 'DECLINED' && cooldownTimeLeft > 0)}
                         onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '');
-                          const newPrice = Number(val);
-                          setAgreedPrice(newPrice);
-                          if (socket.current) {
-                            const searchParams = new URLSearchParams(window.location.search);
-                            const targetBuyerId = searchParams.get('buyerId') || (userRole === 'buyer' ? JSON.parse(sessionStorage.getItem('user'))?._id : null);
-                            
-                            socket.current.emit('price_update', {
-                              productId: id,
-                              buyerId: targetBuyerId,
-                              agreedPrice: newPrice
-                            });
-                          }
+                           const val = e.target.value.replace(/\D/g, '');
+                           const newTotalPrice = Number(val);
+                           const newUnitPrice = newTotalPrice / quantity;
+                           setAgreedPrice(newUnitPrice);
+                           if (socket.current) {
+                             const searchParams = new URLSearchParams(window.location.search);
+                             const targetBuyerId = searchParams.get('buyerId') || (userRole === 'buyer' ? JSON.parse(sessionStorage.getItem('user'))?._id : null);
+                             
+                             socket.current.emit('price_update', {
+                               productId: id,
+                               buyerId: targetBuyerId,
+                               agreedPrice: newUnitPrice,
+                               quantity: quantity
+                             });
+                           }
                         }}
                         className={`w-full text-4xl font-serif font-black tracking-tighter ${dealStatus === 'AGREED' ? 'text-gray-500' : 'text-gray-900'} focus:outline-none focus:ring-0 bg-transparent border-none p-0 m-0`}
                       />
-                      {dealStatus !== 'AGREED' && dealStatus !== 'DECLINED' && (
+                      {dealStatus !== 'AGREED' && (dealStatus !== 'DECLINED' || cooldownTimeLeft <= 0) && (
                         <div className="absolute right-0 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Edit2 size={14} className="text-gray-300" />
                         </div>
@@ -793,10 +831,13 @@ const Negotiation = () => {
                       <div className={`text-[10px] font-black uppercase tracking-widest mb-0.5 ${
                         userRole === 'seller' ? 'text-indigo-700/60' : 'text-green-700/60'
                       }`}>
-                        {userRole === 'seller' ? 'Discount Offered' : 'Total Savings'}
+                        {userRole === 'seller' ? 'Total Discount' : 'Total Savings'}
                       </div>
                       <div className={`text-lg font-black ${userRole === 'seller' ? 'text-indigo-600' : 'text-green-600'}`}>
-                        &#8377;{(Math.abs(product.price - agreedPrice)).toFixed(2)} ({( ((product.price - agreedPrice)/product.price)*100 ).toFixed(1)}% {product.price > agreedPrice ? 'OFF' : 'ABOVE'})
+                        &#8377;{(Math.abs(product.price - agreedPrice) * quantity).toLocaleString()} ({( ((product.price - agreedPrice)/product.price)*100 ).toFixed(1)}% {product.price > agreedPrice ? 'OFF' : 'ABOVE'})
+                      </div>
+                      <div className="text-[10px] font-bold opacity-60 mt-1">
+                        &#8377;{Math.abs(product.price - agreedPrice).toLocaleString()} per unit
                       </div>
                     </div>
                     <div className={userRole === 'seller' ? 'text-indigo-500' : 'text-green-500'}>
@@ -811,7 +852,7 @@ const Negotiation = () => {
                         <button 
                           type="button"
                           onClick={() => {
-                            navigate('/checkout', { state: { price: agreedPrice, product: product } });
+                            navigate('/checkout', { state: { price: agreedPrice, product: product, quantity: quantity } });
                           }}
                           className="w-full bg-[#10B981] text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#059669] transition-all shadow-lg shadow-green-500/20"
                         >
@@ -823,13 +864,45 @@ const Negotiation = () => {
                           onClick={() => {
                             handleUpdateDealStatus('AGREED');
                             setTimeout(() => {
-                              navigate('/checkout', { state: { price: agreedPrice, product: product } });
+                              navigate('/checkout', { state: { price: agreedPrice, product: product, quantity: quantity } });
                             }, 500);
                           }}
                           className="w-full bg-[#10B981] text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#059669] transition-all shadow-lg shadow-green-500/20"
                         >
                           <ShoppingCart size={16} /> Accept Seller's Offer & Pay
                         </button>
+                      ) : dealStatus === 'DECLINED' ? (
+                        <div className="space-y-3">
+                          <button 
+                            type="button"
+                            onClick={() => {
+                              navigate('/checkout', { state: { price: product.price, product: product, quantity: quantity } });
+                            }}
+                            className="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20"
+                          >
+                            <ShoppingCart size={16} /> Buy at Original Price (&#8377;{product.price.toLocaleString()})
+                          </button>
+                          {cooldownTimeLeft > 0 ? (
+                             <button 
+                              type="button"
+                              disabled={true}
+                              className="w-full bg-gray-100 text-red-500 py-4 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 border border-red-100"
+                            >
+                              <AlertTriangle size={16} /> Cooldown: {Math.floor(cooldownTimeLeft / 60)}:{(cooldownTimeLeft % 60).toString().padStart(2, '0')}
+                            </button>
+                          ) : (
+                            <button 
+                              type="button"
+                              onClick={() => {
+                                handleUpdateDealStatus('PENDING');
+                                setAgreedPrice(product.price * 0.9);
+                              }}
+                              className="w-full bg-amber-500 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-amber-600 transition-all shadow-lg shadow-amber-500/20"
+                            >
+                              <Edit2 size={16} /> Negotiate Again
+                            </button>
+                          )}
+                        </div>
                       ) : (
                         <button 
                           type="button"
@@ -872,10 +945,22 @@ const Negotiation = () => {
                   <button 
                     type="button"
                     onClick={() => handleUpdateDealStatus('DECLINED')}
-                    className="w-full bg-white text-gray-400 py-4 rounded-xl font-black text-xs uppercase tracking-widest border border-gray-100 hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
+                    disabled={dealStatus === 'DECLINED' && cooldownTimeLeft > 0}
+                    className="w-full bg-white text-gray-400 py-4 rounded-xl font-black text-xs uppercase tracking-widest border border-gray-100 hover:bg-gray-50 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     <ArrowLeft size={16} className="rotate-45" /> Decline Deal
                   </button>
+                  {dealStatus === 'DECLINED' && cooldownTimeLeft > 0 && (
+                    <div className="flex flex-col items-center gap-2 pt-2">
+                      <div className="text-[10px] font-black text-red-500 uppercase tracking-widest flex items-center gap-1.5">
+                        <AlertTriangle size={12} />
+                        Cooldown Active: {Math.floor(cooldownTimeLeft / 60)}:{(cooldownTimeLeft % 60).toString().padStart(2, '0')}
+                      </div>
+                      <p className="text-[9px] text-gray-400 font-medium text-center">
+                        The seller declined the deal. You can try again after the cooldown period.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Negotiation Log */}

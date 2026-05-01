@@ -116,6 +116,7 @@ exports.getSellerNegotiationSummary = async (req, res) => {
         product: productMap.get(productId),
         lastMessage: message.text,
         offerPrice: message.offerPrice || null,
+        quantity: message.quantity || 1,
         messageType: message.type,
         createdAt: message.createdAt
       });
@@ -139,7 +140,8 @@ exports.getSellerNegotiationSummary = async (req, res) => {
       return {
         ...conv,
         negotiationId: record?._id || null,
-        status: record?.status || 'PENDING'
+        status: record?.status || 'PENDING',
+        quantity: record?.quantity || conv.quantity || 1
       };
     });
 

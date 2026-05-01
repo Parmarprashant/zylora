@@ -146,8 +146,8 @@ export const analyzeSellerData = async (sellerData, sellerId = 'default', freque
       try {
         console.log(`Attempting NVIDIA analysis with ${model}...`);
         
-        const BACKEND_URL = window.location.hostname === 'localhost' 
-          ? 'http://localhost:5001' 
+        const BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+          ? 'http://127.0.0.1:5001' 
           : 'https://zylora-e-commerce.onrender.com';
 
         const response = await fetch(`${BACKEND_URL}/api/ai-proxy`, {

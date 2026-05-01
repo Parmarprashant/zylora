@@ -16,8 +16,8 @@ const AuctionOrderConfirmation = () => {
   const [winnerStatus, setWinnerStatus] = useState(null);
   const [error, setError] = useState('');
 
-  const BACKEND_URL = window.location.hostname === 'localhost'
-    ? 'http://localhost:5001'
+  const BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://127.0.0.1:5001'
     : 'https://zylora-e-commerce.onrender.com';
 
   useEffect(() => {

@@ -11,7 +11,7 @@ const Footer = () => {
     if (email) {
       setSubscribed(true);
       setEmail('');
-      setTimeout(() => setSubscribed(false), 5000);
+      setTimeout(() => setSubscribed(false), 5001);
     }
   };
 

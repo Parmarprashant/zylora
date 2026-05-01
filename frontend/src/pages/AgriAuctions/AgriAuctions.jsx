@@ -30,15 +30,15 @@ const AgriAuctions = () => {
   const [closedAuctionsData, setClosedAuctionsData] = useState([]);
   const socketRef = React.useRef(null);
 
-  const BACKEND_URL = window.location.hostname === 'localhost' 
-    ? 'http://localhost:5001' 
+  const BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+    ? 'http://127.0.0.1:5001' 
     : 'https://zylora-e-commerce.onrender.com';
 
   const fetchAuctions = async () => {
     try {
       console.log(`Fetching auctions from: ${BACKEND_URL}/api/auctions`);
       const res = await axios.get(`${BACKEND_URL}/api/auctions`, {
-        timeout: 5000
+        timeout: 5001
       });
       console.log('Auctions fetched:', res.data);
       if (res.data.success) {
@@ -107,13 +107,13 @@ const AgriAuctions = () => {
     const pollInterval = setInterval(() => {
       fetchAuctions();
       fetchClosedAuctions();
-    }, 5000);
+    }, 5001);
 
     // Initialize socket
     const socket = io(BACKEND_URL, {
       reconnection: true,
       reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
+      reconnectionDelayMax: 5001,
       reconnectionAttempts: 5,
       transports: ['websocket', 'polling']
     });

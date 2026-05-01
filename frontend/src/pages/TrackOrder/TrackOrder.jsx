@@ -16,8 +16,8 @@ const TrackOrder = () => {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const BACKEND_URL = window.location.hostname === 'localhost' 
-    ? 'http://localhost:5001' 
+  const BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+    ? 'http://127.0.0.1:5001' 
     : 'https://zylora-e-commerce.onrender.com';
 
   useEffect(() => {
@@ -183,7 +183,7 @@ const TrackOrder = () => {
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Premium</p>
                     <h4 className="text-sm font-bold text-gray-900 mb-2">{item.name}</h4>
                     <div className="space-y-1">
-                      <p className="text-[10px] text-gray-500 font-medium">Batch: #AG-992 • 5KG Sack</p>
+                      <p className="text-[10px] text-gray-500 font-medium">Qty: {item.quantity}</p>
                       {order.isNegotiated && (
                         <span className="inline-block bg-[#10B981] text-white text-[8px] font-black px-2 py-1 rounded uppercase tracking-widest">
                           Negotiated Price

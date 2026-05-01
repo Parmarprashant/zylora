@@ -19,7 +19,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:3000", "https://zylora-tau.vercel.app", "https://zylora-e-commerce.onrender.com", "*"],
+    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:3000", "http://127.0.0.1:5173", "http://127.0.0.1:3000", "https://zylora-ecommerce.vercel.app", "https://zylora-e-commerce.onrender.com", "*"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true
   },
@@ -58,7 +58,8 @@ io.on('connection', (socket) => {
         sender: data.senderId,
         text: data.text,
         type: data.type || 'text',
-        offerPrice: data.offerPrice
+        offerPrice: data.offerPrice,
+        quantity: data.quantity || 1
       });
 
       const product = await Product.findById(data.productId).select('seller');
@@ -74,16 +75,30 @@ io.on('connection', (socket) => {
           });
 
           let newStatus = existingNegotiation ? existingNegotiation.status : 'PENDING';
-          if (data.type === 'offer') {
-            newStatus = data.senderRole === 'buyer' ? 'COUNTERED' : 'OFFER_SENT';
-          } else if (data.type === 'text' && existingNegotiation && existingNegotiation.status === 'NEW') {
-            newStatus = 'PENDING';
+          const isDeclined = existingNegotiation && existingNegotiation.status === 'DECLINED';
+          let cooldownOver = true;
+
+          if (isDeclined) {
+            const lastUpdate = existingNegotiation.updatedAt || existingNegotiation.lastMessageAt || new Date();
+            const diffMinutes = (new Date() - new Date(lastUpdate)) / (1000 * 60);
+            cooldownOver = diffMinutes >= 5;
+          }
+
+          if (!isDeclined || cooldownOver) {
+            if (data.type === 'offer') {
+              newStatus = data.senderRole === 'buyer' ? 'COUNTERED' : 'OFFER_SENT';
+            } else if (data.type === 'text') {
+              if (existingNegotiation && (existingNegotiation.status === 'NEW' || existingNegotiation.status === 'DECLINED')) {
+                newStatus = 'PENDING';
+              }
+            }
           }
 
           const update = {
             status: newStatus,
             lastMessage: data.text,
-            lastMessageAt: newMessage.createdAt
+            lastMessageAt: newMessage.createdAt,
+            quantity: data.quantity || (existingNegotiation ? existingNegotiation.quantity : 1)
           };
 
           if (typeof data.offerPrice === 'number') {
@@ -150,7 +165,8 @@ io.on('connection', (socket) => {
       console.log('Price update received:', data);
       const room = data.buyerId ? `${data.productId}_${data.buyerId}` : data.productId;
       socket.to(room).emit('price_update', {
-         agreedPrice: data.agreedPrice
+         agreedPrice: data.agreedPrice,
+         quantity: data.quantity
        });
      } catch (err) {
        console.error('Socket price_update error:', err);
@@ -177,26 +193,46 @@ io.on('connection', (socket) => {
         if (targetBuyerId) {
           const product = await Product.findById(data.productId).select('seller');
           if (product) {
-            await Negotiation.findOneAndUpdate(
-              {
-                productId: data.productId,
-                buyer: targetBuyerId,
-                seller: product.seller
-              },
-              {
-                $set: {
-                  status: data.status,
-                  agreedPrice: data.price || 0,
-                  lastMessage: `Deal status updated to ${data.status}`,
-                  lastMessageAt: new Date()
+            const existingNegotiation = await Negotiation.findOne({
+              productId: data.productId,
+              buyer: targetBuyerId,
+              seller: product.seller
+            });
+
+            const isDeclined = existingNegotiation && existingNegotiation.status === 'DECLINED';
+            let cooldownOver = true;
+
+            if (isDeclined) {
+              const lastUpdate = existingNegotiation.updatedAt || existingNegotiation.lastMessageAt || new Date();
+              const diffMinutes = (new Date() - new Date(lastUpdate)) / (1000 * 60);
+              cooldownOver = diffMinutes >= 5;
+            }
+
+            // Allow the update if it's not currently declined, OR if cooldown is over, 
+            // OR if the NEW status is also DECLINED (seller re-declining is fine)
+            if (!isDeclined || cooldownOver || data.status === 'DECLINED') {
+              await Negotiation.findOneAndUpdate(
+                {
+                  productId: data.productId,
+                  buyer: targetBuyerId,
+                  seller: product.seller
+                },
+                {
+                  $set: {
+                    status: data.status,
+                    agreedPrice: data.price || 0,
+                    quantity: data.quantity || 1,
+                    lastMessage: `Deal status updated to ${data.status}`,
+                    lastMessageAt: new Date()
+                  }
+                },
+                {
+                  upsert: true,
+                  new: true,
+                  setDefaultsOnInsert: true
                 }
-              },
-              {
-                upsert: true,
-                new: true,
-                setDefaultsOnInsert: true
-              }
-            );
+              );
+            }
 
             // Emit to both specific and general rooms
             const specificRoom = `${data.productId}_${targetBuyerId}`;
@@ -284,7 +320,11 @@ startNegotiationTimeoutHandler(io);
 app.use(express.json());
 
 // Enable CORS
-app.use(cors());
+// Enable CORS
+app.use(cors({
+  origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:3000", "http://127.0.0.1:5173", "http://127.0.0.1:3000", "https://zylora-ecommerce.vercel.app", "https://zylora-e-commerce.onrender.com"],
+  credentials: true
+}));
 
 // Route files
 const auth = require('./routes/authRoutes');
@@ -364,3 +404,4 @@ process.on('unhandledRejection', (err, promise) => {
   // Close server & exit process
   // server.close(() => process.exit(1));
 });
+// Trigger restart

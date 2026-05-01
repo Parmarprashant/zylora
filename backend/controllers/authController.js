@@ -133,10 +133,16 @@ exports.updateDetails = async (req, res) => {
 // @access  Private
 exports.addAddress = async (req, res) => {
   try {
+    console.log('Adding address for user:', req.user.id);
+    console.log('Address data:', req.body);
+    
     const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
     
     // If it's the first address, make it selected
-    if (user.addresses.length === 0) {
+    if (!user.addresses || user.addresses.length === 0) {
       req.body.selected = true;
     } else if (req.body.selected) {
       // Unselect others
@@ -145,12 +151,14 @@ exports.addAddress = async (req, res) => {
 
     user.addresses.push(req.body);
     await user.save();
+    console.log('Address saved successfully. Total addresses:', user.addresses.length);
 
     res.status(200).json({
       success: true,
       data: user.addresses
     });
   } catch (err) {
+    console.error('ADDRESS SAVE ERROR:', err);
     res.status(400).json({ success: false, error: err.message });
   }
 };
