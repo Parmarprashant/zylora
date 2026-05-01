@@ -31,11 +31,22 @@ exports.createRazorpayOrder = async (req, res) => {
       });
     }
 
+    let finalAmount = Math.round(Number(amount) * 100); // Ensure amount is a number and round to paise
+
+    // Razorpay Test Mode has a default limit of ₹5,00,000 (50,000,000 paise) per transaction.
+    // If we are in development and the amount exceeds this, cap it for testing purposes.
+    if (process.env.NODE_ENV !== 'production' && finalAmount > 50000000) {
+      console.warn(`[DEV MODE] Capping Razorpay test amount from ${finalAmount} paise to 50000000 paise (5 Lakhs INR) to bypass test mode limits.`);
+      finalAmount = 50000000;
+    }
+
     const options = {
-      amount: Math.round(amount * 100), // Razorpay expects amount in paise
+      amount: finalAmount,
       currency,
       receipt: `receipt_${Date.now()}`
     };
+
+    console.log('Creating Razorpay order with options:', options);
 
     const razorpay = getRazorpayInstance();
     if (!razorpay) {
@@ -46,16 +57,28 @@ exports.createRazorpayOrder = async (req, res) => {
     }
 
     const order = await razorpay.orders.create(options);
+    console.log('Razorpay order created successfully:', order.id);
 
     res.status(200).json({
       success: true,
       data: order
     });
   } catch (error) {
-    console.error('Error creating Razorpay order:', error);
+    console.error('RAZORPAY ERROR FULL:', JSON.stringify(error, null, 2));
+    console.error('RAZORPAY ERROR MESSAGE:', error.message);
+    
+    let errorMessage = 'Server Error';
+    if (error.error && error.error.description) {
+      errorMessage = error.error.description;
+    } else if (error.description) {
+      errorMessage = error.description;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+
     res.status(500).json({
       success: false,
-      error: error.message || 'Server Error'
+      error: errorMessage
     });
   }
 };

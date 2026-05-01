@@ -43,8 +43,8 @@ const Checkout = () => {
     address: ''
   });
 
-  const BACKEND_URL = window.location.hostname === 'localhost' 
-    ? 'http://localhost:5001' 
+  const BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+    ? 'http://127.0.0.1:5001' 
     : 'https://zylora-e-commerce.onrender.com';
 
   useEffect(() => {
@@ -142,7 +142,12 @@ const Checkout = () => {
       }
     } catch (err) {
       console.error('Error saving address:', err);
-      alert('Failed to save address');
+      if (err.response?.status === 401) {
+        sessionStorage.removeItem('token');
+        navigate('/login');
+      } else {
+        alert(err.response?.data?.error || 'Failed to save address');
+      }
     }
   };
 

@@ -36,8 +36,8 @@ const Profile = () => {
     name: '', mobile: '', address: '', pincode: '', type: 'Home'
   });
 
-  const BACKEND_URL = window.location.hostname === 'localhost' 
-    ? 'http://localhost:5001' 
+  const BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+    ? 'http://127.0.0.1:5001' 
     : 'https://zylora-e-commerce.onrender.com';
 
   useEffect(() => {
@@ -393,9 +393,19 @@ const Profile = () => {
                                 </div>
 
                                 <div className="mt-4 flex items-baseline gap-3">
-                                  <span className="text-xl font-bold text-gray-900">&#8377;{item.price.toLocaleString()}</span>
+                                  <div className="flex flex-col">
+                                    <span className="text-xl font-bold text-gray-900">&#8377;{(item.price * (item.quantity || 1)).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                                    {item.quantity > 1 && (
+                                      <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">&#8377;{Math.round(item.price).toLocaleString('en-IN')} each</span>
+                                    )}
+                                  </div>
                                   {item.originalPrice && (
-                                    <span className="text-sm text-gray-400 line-through">&#8377;{item.originalPrice.toLocaleString()}</span>
+                                    <span className="text-sm text-gray-400 line-through">&#8377;{(item.originalPrice * (item.quantity || 1)).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                                  )}
+                                  {item.quantity > 0 && (
+                                    <span className="text-sm text-gray-600 font-bold bg-gray-100 px-3 py-1 rounded-md ml-4">
+                                      Qty: {item.quantity}
+                                    </span>
                                   )}
                                 </div>
 
@@ -420,7 +430,10 @@ const Profile = () => {
                                   <button className="border border-gray-200 text-gray-900 px-6 py-2.5 rounded-lg text-xs font-bold hover:bg-gray-50 transition-colors">
                                     Review
                                   </button>
-                                  <button className="bg-amber-500 text-white px-6 py-2.5 rounded-lg text-xs font-bold hover:bg-amber-600 transition-colors">
+                                  <button 
+                                    onClick={() => navigate(`/product/${item.product}`)}
+                                    className="bg-amber-500 text-white px-6 py-2.5 rounded-lg text-xs font-bold hover:bg-amber-600 transition-colors"
+                                  >
                                     Buy Again
                                   </button>
                                 </div>

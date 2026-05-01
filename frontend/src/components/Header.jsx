@@ -1,24 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, Menu, X, ShoppingCart, Heart, User, LogOut, LayoutDashboard, Home, Gavel, MessageSquare, Wallet, Globe
 } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useTranslation } from 'react-i18next';
 import { setLanguage } from '../features/ui/uiSlice';
+import { products as staticProducts } from '../data/products';
 
 const Header = ({ placeholder, isDashboard = false }) => {
   const { t, i18n } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { cartCount, fetchCart } = useCart();
   const { wishlistCount, fetchWishlist } = useWishlist();
-  const [searchQuery, setSearchQuery] = useState('');
+  
+  const [searchQuery, setSearchQuery] = useState(searchParams?.get('q') || '');
+  const [searchFocused, setSearchFocused] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
+
+  const getSuggestions = () => {
+    if (!searchQuery.trim()) {
+      return ['iPhone 15', 'Samsung S24', 'Organic Honey', 'Denim Jacket', 'Office Chair'];
+    }
+    const query = searchQuery.toLowerCase().trim();
+    const matches = new Set();
+    staticProducts.forEach(p => {
+      if (p.name.toLowerCase().includes(query)) matches.add(p.name);
+      if (p.category.toLowerCase().includes(query)) matches.add(p.category);
+      if (p.brand && p.brand.toLowerCase().includes(query)) matches.add(p.brand);
+    });
+    return Array.from(matches).slice(0, 6);
+  };
+  const suggestions = getSuggestions();
+
+  useEffect(() => {
+    if (searchParams?.get('q')) {
+      setSearchQuery(searchParams.get('q'));
+    }
+  }, [searchParams]);
 
   const categories = [
     { name: t('electronics'), path: 'Electronics', icon: '📱' },
@@ -183,18 +208,51 @@ const Header = ({ placeholder, isDashboard = false }) => {
 
           {/* Center: Large Search Bar */}
           {!isSeller && (
-            <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-3xl relative group">
-              <input 
-                type="text" 
-                placeholder="Search for premium goods or agri-lots..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#111827] border border-gray-700/50 rounded-xl py-3 px-6 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all placeholder:text-gray-500 text-gray-200 group-hover:bg-[#1a2333]"
-              />
-              <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-amber-500 transition-colors">
-                <Search size={20} />
-              </button>
-            </form>
+            <div className="hidden md:flex flex-1 max-w-3xl relative group">
+              <form onSubmit={handleSearch} className="w-full relative">
+                <input 
+                  type="text" 
+                  placeholder="Search for premium goods or agri-lots..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
+                  className="w-full bg-[#111827] border border-gray-700/50 rounded-xl py-3 px-6 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all placeholder:text-gray-500 text-gray-200 group-hover:bg-[#1a2333]"
+                />
+                <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-amber-500 transition-colors">
+                  <Search size={20} className="pointer-events-none" />
+                </button>
+              </form>
+              
+              {/* Desktop Suggestions Dropdown */}
+              {searchFocused && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-[#111827] border border-gray-700/50 rounded-xl shadow-2xl py-2 z-50 overflow-hidden">
+                  {!searchQuery.trim() && (
+                    <div className="px-6 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-white/5 mb-1">
+                      Trending Searches
+                    </div>
+                  )}
+                  {suggestions.length > 0 ? suggestions.map((suggestion, idx) => (
+                    <div 
+                      key={idx}
+                      onClick={() => {
+                        setSearchQuery(suggestion);
+                        navigate(`/search?q=${encodeURIComponent(suggestion)}`);
+                        setSearchFocused(false);
+                      }}
+                      className="px-6 py-3 text-sm text-gray-300 hover:bg-white/5 hover:text-amber-500 cursor-pointer flex items-center gap-3 transition-colors"
+                    >
+                      <Search size={14} className="text-gray-500" />
+                      <span className="line-clamp-1">{suggestion}</span>
+                    </div>
+                  )) : (
+                    <div className="px-6 py-3 text-sm text-gray-500 flex items-center gap-3">
+                       No recommendations found
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           )}
 
           {/* Right: Actions & Icons */}
@@ -277,17 +335,50 @@ const Header = ({ placeholder, isDashboard = false }) => {
         </div>
 
         {/* Mobile Search - Visible only on small screens */}
-        <div className="md:hidden pb-4">
+        <div className="md:hidden pb-4 relative z-50">
           <form onSubmit={handleSearch} className="relative">
             <input 
               type="text" 
               placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
               className="w-full bg-[#111827] border border-gray-700/50 rounded-xl py-2 px-4 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all text-gray-200"
             />
-            <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500" />
+            <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-amber-500 transition-colors">
+              <Search size={18} className="pointer-events-none" />
+            </button>
           </form>
+
+          {/* Mobile Suggestions Dropdown */}
+          {searchFocused && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-[#111827] border border-gray-700/50 rounded-xl shadow-2xl py-2 z-50 overflow-hidden">
+              {!searchQuery.trim() && (
+                <div className="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-white/5 mb-1">
+                  Trending Searches
+                </div>
+              )}
+              {suggestions.length > 0 ? suggestions.map((suggestion, idx) => (
+                <div 
+                  key={idx}
+                  onClick={() => {
+                    setSearchQuery(suggestion);
+                    navigate(`/search?q=${encodeURIComponent(suggestion)}`);
+                    setSearchFocused(false);
+                  }}
+                  className="px-4 py-3 text-sm text-gray-300 hover:bg-white/5 hover:text-amber-500 cursor-pointer flex items-center gap-3 transition-colors"
+                >
+                  <Search size={14} className="text-gray-500" />
+                  <span className="line-clamp-1">{suggestion}</span>
+                </div>
+              )) : (
+                <div className="px-4 py-3 text-sm text-gray-500 flex items-center gap-3">
+                   No recommendations found
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

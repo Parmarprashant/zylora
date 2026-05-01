@@ -23,8 +23,8 @@ const SellerAuctions = () => {
     durationUnit: 'hours'
   });
 
-  const BACKEND_URL = window.location.hostname === 'localhost'
-    ? 'http://localhost:5001'
+  const BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://127.0.0.1:5001'
     : 'https://zylora-e-commerce.onrender.com';
 
   const fetchData = async () => {
@@ -240,7 +240,7 @@ const SellerAuctions = () => {
                   min="1"
                   value={formData.basePrice}
                   onChange={(e) => setFormData({...formData, basePrice: e.target.value})}
-                  placeholder="e.g. 5000"
+                  placeholder="e.g. 5001"
                   className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-600 outline-none"
                 />
               </div>

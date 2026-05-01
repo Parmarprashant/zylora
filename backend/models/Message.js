@@ -23,6 +23,9 @@ const messageSchema = new mongoose.Schema({
   offerPrice: {
     type: Number
   },
+  quantity: {
+    type: Number
+  },
   status: {
     type: String,
     enum: ['sent', 'read'],
