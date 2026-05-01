@@ -206,7 +206,7 @@ exports.getProduct = async (req, res) => {
 // @access  Private (Seller only)
 exports.getMyProducts = async (req, res) => {
   try {
-    const products = await Product.find({ seller: req.user.id });
+    const products = await Product.find({ seller: req.user.id }).sort('-createdAt');
     res.status(200).json({
       success: true,
       count: products.length,

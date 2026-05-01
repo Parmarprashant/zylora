@@ -15,7 +15,7 @@ const SellerNegotiations = () => {
   const [acceptedNegotiations, setAcceptedNegotiations] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const BACKEND_URL = window.location.hostname === 'localhost'
+  const BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5001'
     : 'https://zylora-e-commerce.onrender.com';
 
