@@ -95,43 +95,107 @@ const Header = ({ placeholder, isDashboard = false }) => {
     return (
       <header className="bg-[#0A1628] text-white sticky top-0 z-50 border-b border-gray-800">
         <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-12">
-            <Link to="/seller-dashboard" className="text-2xl font-bold tracking-tighter">Zylora</Link>
+          <div className="flex items-center gap-6 lg:gap-12">
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2 hover:bg-white/5 rounded-lg transition-all"
+            >
+              {mobileMenuOpen ? <X size={20} className="text-amber-500" /> : <Menu size={20} className="text-amber-500" />}
+            </button>
+            <Link to="/seller-dashboard" className="text-xl lg:text-2xl font-bold tracking-tighter">Zylora</Link>
             <nav className="hidden md:flex items-center gap-8">
               <Link to="/login" className="text-xs font-bold text-gray-400 hover:text-white transition-colors">Become a Seller</Link>
               <Link to="/agri-auctions" className="text-xs font-bold text-gray-400 hover:text-white transition-colors">Agri Auctions</Link>
             </nav>
           </div>
 
-          <div className="flex items-center gap-6">
-            <div className="relative group">
+          <div className="flex items-center gap-3 lg:gap-6">
+            <div className="relative group hidden sm:block">
               <input 
                 type="text" 
-                placeholder="Search dashboard..."
-                className="bg-[#111827] border border-gray-700/50 rounded-lg py-2 px-4 pr-10 text-xs w-64 focus:outline-none focus:ring-1 focus:ring-amber-500 transition-all"
+                placeholder="Search..."
+                className="bg-[#111827] border border-gray-700/50 rounded-lg py-2 px-4 pr-10 text-xs w-32 lg:w-64 focus:outline-none focus:ring-1 focus:ring-amber-500 transition-all"
               />
               <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500" />
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1 lg:gap-4">
               <button onClick={toggleLanguage} className="p-2 hover:bg-white/5 rounded-lg transition-all group" title={i18n.language === 'en' ? 'हिन्दी में बदलें' : 'Switch to English'}>
-                <Globe size={20} className="text-amber-500 group-hover:scale-110 transition-transform" />
-              </button>
-              <button onClick={handleLogout} className="p-2 hover:bg-white/5 rounded-lg transition-all group" title="Logout">
-                <LogOut size={20} className="text-amber-500 group-hover:scale-110 transition-transform" />
+                <Globe size={18} className="text-amber-500 group-hover:scale-110 transition-transform" />
               </button>
               <button onClick={() => navigate('/profile')} className="p-2 hover:bg-white/5 rounded-lg transition-all group" title="Profile">
-                <User size={20} className="text-amber-500 group-hover:scale-110 transition-transform" />
-              </button>
-              <button onClick={() => navigate('/wishlist')} className="p-2 hover:bg-white/5 rounded-lg transition-all group" title="Wishlist">
-                <Heart size={20} className="text-amber-500 group-hover:scale-110 transition-transform" />
+                <User size={18} className="text-amber-500 group-hover:scale-110 transition-transform" />
               </button>
               <button onClick={() => navigate('/cart')} className="p-2 hover:bg-white/5 rounded-lg transition-all group" title="Cart">
-                <ShoppingCart size={20} className="text-amber-500 group-hover:scale-110 transition-transform" />
+                <ShoppingCart size={18} className="text-amber-500 group-hover:scale-110 transition-transform" />
+              </button>
+              <button onClick={handleLogout} className="p-2 hover:bg-white/5 rounded-lg transition-all group" title="Logout">
+                <LogOut size={18} className="text-amber-500 group-hover:scale-110 transition-transform" />
               </button>
             </div>
           </div>
         </div>
+
+        {/* Mobile Sidebar Overlay for Dashboard */}
+        <AnimatePresence>
+          {mobileMenuOpen && isDashboard && (
+            <>
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setMobileMenuOpen(false)}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] lg:hidden"
+              />
+              <motion.div 
+                initial={{ x: '-100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '-100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="fixed top-0 left-0 bottom-0 w-[280px] bg-[#0A1628] border-r border-gray-800 z-[70] lg:hidden flex flex-col p-6"
+              >
+                <div className="flex items-center justify-between mb-10">
+                  <Link to="/seller-dashboard" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-black tracking-tighter">
+                    <span className="text-white">Zy</span>
+                    <span className="text-amber-500">Lora</span>
+                  </Link>
+                  <button onClick={() => setMobileMenuOpen(false)} className="p-2 hover:bg-white/5 rounded-lg">
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <nav className="space-y-2 flex-1">
+                  {[
+                    { name: t('dashboard'), icon: LayoutDashboard, path: '/seller-dashboard' },
+                    { name: t('my_products'), icon: Package, path: '/seller-dashboard' },
+                    { name: t('orders'), icon: ShoppingCart, path: '/seller-orders' },
+                    { name: t('negotiations'), icon: MessageSquare, path: '/seller-negotiations' },
+                    { name: t('auction_manager'), icon: Gavel, path: '/seller-auctions' },
+                    { name: t('earnings'), icon: Wallet, path: '/seller-earnings' },
+                    { name: t('returns'), icon: RotateCcw, path: '/seller-orders?filter=Returns' }
+                  ].map((item) => (
+                    <Link
+                      key={item.name}
+                      to={item.path}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-bold text-gray-300 hover:bg-white/5 hover:text-white transition-all"
+                    >
+                      <item.icon size={20} className="text-amber-500" />
+                      {item.name}
+                    </Link>
+                  ))}
+                </nav>
+
+                <div className="pt-6 border-t border-gray-800">
+                  <button onClick={handleLogout} className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-bold text-red-400 hover:bg-red-500/10 transition-all">
+                    <LogOut size={20} />
+                    {t('logout')}
+                  </button>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </header>
     );
   }
@@ -383,20 +447,46 @@ const Header = ({ placeholder, isDashboard = false }) => {
       </div>
 
       {/* Mobile Menu Overlay */}
-      {mobileMenuOpen && (
+      {mobileMenuOpen && !isDashboard && (
         <div className="lg:hidden bg-[#0A1628] border-t border-gray-800 p-6 space-y-6">
-          <nav className="grid gap-4">
+          {/* Mobile Search Bar */}
+          <form onSubmit={handleSearch} className="relative">
+            <input 
+              type="text" 
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[#111827] border border-gray-700/50 rounded-xl py-3 px-6 pr-12 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
+            />
+            <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">
+              <Search size={18} />
+            </button>
+          </form>
+
+          <nav className="grid gap-2">
             <Link to="/" onClick={closeMobileMenu} className="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl transition-all">
-              <Home size={20} className="text-amber-500" />
-              <span className="font-bold">Home</span>
+              <Home size={18} className="text-amber-500" />
+              <span className="font-bold text-sm">Home</span>
             </Link>
             <Link to="/agri-auctions" onClick={closeMobileMenu} className="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl transition-all">
-              <span className="text-xl">🌿</span>
-              <span className="font-bold text-teal-400">Agri Auctions</span>
+              <span className="text-lg">🌿</span>
+              <span className="font-bold text-teal-400 text-sm">Agri Auctions</span>
+            </Link>
+            <Link to="/profile" onClick={closeMobileMenu} className="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl transition-all">
+              <User size={18} className="text-amber-500" />
+              <span className="font-bold text-sm">My Profile</span>
+            </Link>
+            <Link to="/wishlist" onClick={closeMobileMenu} className="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl transition-all">
+              <Heart size={18} className="text-amber-500" />
+              <span className="font-bold text-sm">Wishlist</span>
+            </Link>
+            <Link to="/cart" onClick={closeMobileMenu} className="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl transition-all">
+              <ShoppingCart size={18} className="text-amber-500" />
+              <span className="font-bold text-sm">Cart</span>
             </Link>
             <Link to="/login" onClick={closeMobileMenu} className="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl transition-all">
-              <LayoutDashboard size={20} className="text-amber-500" />
-              <span className="font-bold">Become a Seller</span>
+              <LayoutDashboard size={18} className="text-amber-500" />
+              <span className="font-bold text-sm">Become a Seller</span>
             </Link>
           </nav>
           

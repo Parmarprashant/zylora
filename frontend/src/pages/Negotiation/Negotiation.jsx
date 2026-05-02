@@ -226,7 +226,14 @@ const Negotiation = () => {
     };
 
     peerConnection.current.ontrack = (event) => {
+      console.log('Remote track received:', event.streams[0]);
       setRemoteStream(event.streams[0]);
+      
+      // Auto-play fix for mobile/chrome
+      if (remoteAudioRef.current) {
+        remoteAudioRef.current.srcObject = event.streams[0];
+        remoteAudioRef.current.play().catch(e => console.error('Auto-play blocked:', e));
+      }
     };
 
     if (localStream.current) {
@@ -267,7 +274,16 @@ const Negotiation = () => {
 
   const handleStartCall = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // High-fidelity audio constraints for maximum clarity
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          sampleRate: 48000,
+          channelCount: 1
+        } 
+      });
       localStream.current = stream;
       
       const searchParams = new URLSearchParams(window.location.search);
@@ -278,13 +294,18 @@ const Negotiation = () => {
       setIsCalling(true);
 
       const offer = await peerConnection.current.createOffer();
-      await peerConnection.current.setLocalDescription(offer);
+      // Set Opus as preferred codec for better clarity at lower bitrates
+      const modifiedOffer = {
+        ...offer,
+        sdp: offer.sdp.replace('useinbandfec=1', 'useinbandfec=1; stereo=0; sprop-maxcapturerate=48000')
+      };
+      await peerConnection.current.setLocalDescription(modifiedOffer);
 
       socket.current.emit('call_user', {
         from: currentUserId,
         name: user?.name || 'User',
         room,
-        signalData: offer
+        signalData: modifiedOffer
       });
     } catch (err) {
       console.error('Error starting call:', err);
@@ -294,7 +315,16 @@ const Negotiation = () => {
 
   const handleAcceptCall = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // High-fidelity audio constraints for maximum clarity
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          sampleRate: 48000,
+          channelCount: 1
+        } 
+      });
       localStream.current = stream;
 
       const searchParams = new URLSearchParams(window.location.search);
@@ -307,12 +337,16 @@ const Negotiation = () => {
 
       await peerConnection.current.setRemoteDescription(new RTCSessionDescription(incomingCall.signalData));
       const answer = await peerConnection.current.createAnswer();
-      await peerConnection.current.setLocalDescription(answer);
+      const modifiedAnswer = {
+        ...answer,
+        sdp: answer.sdp.replace('useinbandfec=1', 'useinbandfec=1; stereo=0; sprop-maxcapturerate=48000')
+      };
+      await peerConnection.current.setLocalDescription(modifiedAnswer);
 
       socket.current.emit('answer_call', {
         from: currentUserId,
         room,
-        signalData: answer
+        signalData: modifiedAnswer
       });
     } catch (err) {
       console.error('Error accepting call:', err);
@@ -745,7 +779,7 @@ const Negotiation = () => {
         </button>
 
         {/* Product Summary Card */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-6 flex items-center justify-between shadow-sm">
+        <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between shadow-sm gap-4">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 bg-gray-50 rounded-lg flex items-center justify-center p-2 border border-gray-100">
               <img src={product.images[0]} alt={product.name} className="max-w-full max-h-full object-contain" />
@@ -827,11 +861,11 @@ const Negotiation = () => {
           {/* Chat Section */}
           <div className="lg:col-span-8 bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-[600px]">
             {/* Tabs */}
-            <div className="flex border-b border-gray-100 px-6">
+            <div className="flex border-b border-gray-100 px-2 sm:px-6 overflow-x-auto no-scrollbar">
               <button 
                 type="button" 
                 onClick={() => setActiveChatTab('Chat')}
-                className={`py-4 px-4 border-b-2 text-xs font-black uppercase tracking-widest flex items-center gap-2 ${activeChatTab === 'Chat' ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-400'}`}
+                className={`py-4 px-3 sm:px-4 border-b-2 text-[10px] sm:text-xs font-black uppercase tracking-widest flex items-center gap-2 whitespace-nowrap ${activeChatTab === 'Chat' ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-400'}`}
               >
                 <Send size={14} className="rotate-45 -mt-1" /> Chat
               </button>
@@ -840,7 +874,7 @@ const Negotiation = () => {
                 <button 
                   type="button" 
                   onClick={handleStartCall}
-                  className="py-4 px-4 border-b-2 border-green-500 text-green-600 text-xs font-black uppercase tracking-widest flex items-center gap-2 animate-bounce"
+                  className="py-4 px-3 sm:px-4 border-b-2 border-green-500 text-green-600 text-[10px] sm:text-xs font-black uppercase tracking-widest flex items-center gap-2 animate-bounce whitespace-nowrap"
                 >
                   <Phone size={14} /> Call Now
                 </button>
@@ -849,14 +883,14 @@ const Negotiation = () => {
                   type="button" 
                   onClick={() => handleRequestCallPermission('voice')}
                   disabled={callPermission === 'REQUESTING'}
-                  className={`py-4 px-4 border-b-2 border-transparent text-gray-400 hover:text-gray-600 text-xs font-black uppercase tracking-widest flex items-center gap-2 ${callPermission === 'REQUESTING' ? 'opacity-50 cursor-wait' : ''}`}
+                  className={`py-4 px-3 sm:px-4 border-b-2 border-transparent text-gray-400 hover:text-gray-600 text-[10px] sm:text-xs font-black uppercase tracking-widest flex items-center gap-2 whitespace-nowrap ${callPermission === 'REQUESTING' ? 'opacity-50 cursor-wait' : ''}`}
                 >
                   <Phone size={14} /> 
-                  {callPermission === 'REQUESTING' ? 'Requesting...' : callPermission === 'DENIED' ? 'Call Denied' : 'Voice Call'}
+                  {callPermission === 'REQUESTING' ? 'Req...' : callPermission === 'DENIED' ? 'Denied' : 'Voice'}
                 </button>
               )}
 
-              <button type="button" className="py-4 px-4 border-b-2 border-transparent text-gray-400 hover:text-gray-600 text-xs font-black uppercase tracking-widest flex items-center gap-2">
+              <button type="button" className="py-4 px-3 sm:px-4 border-b-2 border-transparent text-gray-400 hover:text-gray-600 text-[10px] sm:text-xs font-black uppercase tracking-widest flex items-center gap-2 whitespace-nowrap">
                 <Video size={14} /> Video
               </button>
             </div>
@@ -1054,7 +1088,7 @@ const Negotiation = () => {
                     <div className={`h-[2px] w-full ${dealStatus === 'AGREED' ? 'bg-gray-100' : 'bg-gray-100 group-focus-within:bg-blue-600'} transition-colors mt-1`}></div>
                   </div>
   
-                  <div className={`rounded-xl p-4 flex items-center justify-between border ${
+                  <div className={`rounded-xl p-4 flex items-center justify-between border gap-4 ${
                     userRole === 'seller' ? 'bg-indigo-50 border-indigo-100' : 'bg-[#F0FDF4] border-[#DCFCE7]'
                   }`}>
                     <div>
@@ -1378,13 +1412,9 @@ const Negotiation = () => {
 
       {/* Remote Audio Element */}
       <audio 
-        ref={(el) => {
-          if (el && remoteStream) {
-            el.srcObject = remoteStream;
-            el.play().catch(e => console.error('Audio play error:', e));
-          }
-        }} 
+        ref={remoteAudioRef} 
         autoPlay 
+        playsInline
       />
 
       {/* Footer (Simplified) */}
