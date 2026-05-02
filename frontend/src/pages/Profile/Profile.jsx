@@ -4,7 +4,7 @@ import {
   User, Package, MapPin, CreditCard, Settings, 
   ChevronRight, Clock, CheckCircle, Truck, AlertCircle, 
   MessageSquare, Bell, HelpCircle, Heart, ShieldCheck, Store, RotateCcw, ArrowLeft,
-  Plus, Edit2, Trash2, Shield, Search, Gavel
+  Plus, Edit2, Trash2, Shield, Search, Gavel, ShoppingCart
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
@@ -230,61 +230,61 @@ const Profile = () => {
       <Header />
 
       <main className="max-w-[1600px] mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           
           {/* Sidebar */}
-          <aside className="lg:col-span-3">
+          <aside className="lg:col-span-3 order-2 lg:order-1">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm mb-6"
             >
-              <div className="flex flex-col items-center text-center gap-3 mb-8">
-                <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center text-white text-lg font-bold shadow-md">
+              <div className="flex flex-row lg:flex-col items-center text-left lg:text-center gap-4 lg:gap-3 mb-8">
+                <div className="w-14 lg:w-16 h-14 lg:h-16 bg-black rounded-full flex items-center justify-center text-white text-lg font-bold shadow-md flex-shrink-0">
                   {user?.name?.split(' ').map(n => n[0]).join('') || 'U'}
                 </div>
                 <div>
-                  <h2 className="text-sm font-bold text-gray-900 mb-1">{user?.name || 'User Name'}</h2>
-                  <p className="text-[11px] text-gray-400 mb-2">{user?.email}</p>
+                  <h2 className="text-sm font-bold text-gray-900 mb-1 line-clamp-1">{user?.name || 'User Name'}</h2>
+                  <p className="text-[10px] lg:text-[11px] text-gray-400 mb-2 line-clamp-1">{user?.email}</p>
                   {/* Role Badge */}
                   {user?.role === 'seller' ? (
-                    <span className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider">
+                    <span className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 px-3 py-1 rounded-full text-[10px] lg:text-[11px] font-black uppercase tracking-wider">
                       <Store size={12} />
-                      Business Seller
+                      Seller
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1.5 bg-blue-50 border border-blue-200 text-blue-700 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider">
+                    <span className="inline-flex items-center gap-1.5 bg-blue-50 border border-blue-200 text-blue-700 px-3 py-1 rounded-full text-[10px] lg:text-[11px] font-black uppercase tracking-wider">
                       <ShieldCheck size={12} />
-                      Individual Buyer
+                      Buyer
                     </span>
                   )}
                 </div>
               </div>
 
-              <nav className="space-y-1">
+              <nav className="flex lg:flex-col overflow-x-auto no-scrollbar gap-1 pb-2 lg:pb-0">
                 {[
-                  { id: 'orders', label: 'My Orders', icon: Package },
+                  { id: 'orders', label: 'Orders', icon: Package },
                   { id: 'wishlist', label: 'Wishlist', icon: Heart },
-                  { id: 'negotiations', label: 'My Negotiations', icon: MessageSquare },
+                  { id: 'negotiations', label: 'Negotiations', icon: MessageSquare },
                   { id: 'addresses', label: 'Addresses', icon: MapPin },
                   { id: 'payment', label: 'Payments', icon: CreditCard },
-                  { id: 'notifications', label: 'Notifications', icon: Bell },
+                  { id: 'notifications', label: 'Alerts', icon: Bell },
                   { id: 'settings', label: 'Settings', icon: Settings },
                   { id: 'help', label: 'Help', icon: HelpCircle },
                 ].map((item) => (
                   <button
                     key={item.id}
                     onClick={() => setActiveTab(item.id)}
-                    className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all group ${
+                    className={`flex-shrink-0 lg:flex-shrink flex items-center gap-3 lg:gap-4 px-4 py-3 rounded-xl transition-all group ${
                       activeTab === item.id 
                         ? 'bg-blue-50 text-blue-600' 
                         : 'text-gray-400 hover:bg-gray-50 hover:text-gray-900'
                     }`}
                   >
                     <item.icon size={18} className={activeTab === item.id ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-900'} />
-                    <span className="text-xs font-semibold">{item.label}</span>
+                    <span className="text-xs font-bold whitespace-nowrap">{item.label}</span>
                     {activeTab === item.id && (
-                      <div className="ml-auto w-1 h-5 bg-amber-500 rounded-full" />
+                      <div className="hidden lg:block ml-auto w-1 h-5 bg-amber-500 rounded-full" />
                     )}
                   </button>
                 ))}
@@ -293,7 +293,7 @@ const Profile = () => {
           </aside>
 
           {/* Main Content */}
-          <div className="lg:col-span-9">
+          <div className="lg:col-span-9 order-1 lg:order-2">
             <AnimatePresence mode="wait">
               {activeTab === 'orders' && (
                 <motion.div
@@ -303,8 +303,8 @@ const Profile = () => {
                   exit={{ opacity: 0, y: -10 }}
                   className="space-y-8"
                 >
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-3xl font-bold text-gray-900">My Orders</h2>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <h2 className="text-2xl md:text-3xl font-bold text-gray-900">My Orders</h2>
                     <div className="flex bg-white border border-gray-100 rounded-lg p-1 shadow-sm overflow-x-auto no-scrollbar">
                       {['All', 'Processing', 'Shipped', 'Delivered', 'Returns'].map((filter) => (
                         <button
@@ -374,27 +374,27 @@ const Profile = () => {
                           className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all"
                         >
                           {order.orderItems.map((item, idx) => (
-                            <div key={idx} className="flex flex-col md:flex-row gap-8">
-                              <div className="w-40 h-40 bg-gray-50 rounded-2xl flex items-center justify-center p-4 border border-gray-100 flex-shrink-0">
+                            <div key={idx} className="flex flex-col md:flex-row gap-6 md:gap-8">
+                              <div className="w-full md:w-40 h-48 md:h-40 bg-gray-50 rounded-2xl flex items-center justify-center p-4 border border-gray-100 flex-shrink-0">
                                 <img src={item.image} alt={item.name} className="max-w-full max-h-full object-contain" />
                               </div>
                               
                               <div className="flex-1 flex flex-col">
-                                <div className="flex justify-between items-start mb-2">
+                                <div className="flex flex-col sm:flex-row justify-between items-start mb-4 gap-4">
                                   <div>
                                     <h4 className="text-lg font-bold text-gray-900 mb-1">{item.name}</h4>
                                     <p className="text-xs text-gray-500">
-                                      Order #ZY-{order._id.substring(order._id.length - 5).toUpperCase()} • Placed on {new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                      Order #ZY-{order._id.substring(order._id.length - 5).toUpperCase()} • {new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                     </p>
                                   </div>
-                                  <div className="flex flex-col items-end gap-2">
-                                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border flex items-center gap-1.5 ${getStatusClass(order.status)}`}>
+                                  <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 w-full sm:w-auto">
+                                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border flex items-center gap-1.5 flex-1 sm:flex-none justify-center ${getStatusClass(order.status)}`}>
                                       {getStatusIcon(order.status)}
                                       {order.status}
                                     </span>
                                     {order.isNegotiated && (
-                                      <span className="bg-[#10B981] text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest">
-                                        Negotiated Price
+                                      <span className="bg-[#10B981] text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest flex-1 sm:flex-none justify-center">
+                                        Negotiated
                                       </span>
                                     )}
                                   </div>
@@ -834,22 +834,22 @@ const Profile = () => {
                   ) : (
                     <div className="space-y-4">
                       {negotiations.map((neg) => (
-                        <div key={neg._id} className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all group">
-                          <div className="flex flex-col md:flex-row gap-6">
-                            <div className="w-24 h-24 bg-gray-50 rounded-xl flex-shrink-0 overflow-hidden border border-gray-100 p-2 flex items-center justify-center">
+                        <div key={neg._id} className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-6 shadow-sm hover:shadow-md transition-all group">
+                          <div className="flex flex-col md:flex-row gap-4 sm:gap-6">
+                            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-xl flex-shrink-0 overflow-hidden border border-gray-100 p-2 flex items-center justify-center mx-auto md:mx-0">
                               <img src={neg.product.image} alt={neg.product.name} className="max-w-full max-h-full object-contain" />
                             </div>
                             
                             <div className="flex-1 flex flex-col">
-                              <div className="flex justify-between items-start mb-2">
+                              <div className="flex flex-col sm:flex-row justify-between items-start mb-2 gap-2">
                                 <div>
-                                  <h4 className="font-bold text-gray-900 text-sm md:text-base mb-1 line-clamp-1">{neg.product.name}</h4>
-                                  <div className="flex items-center gap-2">
+                                  <h4 className="font-bold text-gray-900 text-sm md:text-base mb-1 line-clamp-1 text-center sm:text-left">{neg.product.name}</h4>
+                                  <div className="flex items-center gap-2 justify-center sm:justify-start">
                                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Seller:</span>
                                     <span className="text-[11px] font-bold text-blue-600">{neg.seller.storeName}</span>
                                   </div>
                                 </div>
-                                <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                                <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border mx-auto sm:mx-0 ${
                                   neg.status === 'ACCEPTED' ? 'bg-green-50 text-green-700 border-green-100' :
                                   neg.status === 'DECLINED' ? 'bg-red-50 text-red-700 border-red-100' :
                                   'bg-amber-50 text-amber-700 border-amber-100'
@@ -858,33 +858,33 @@ const Profile = () => {
                                 </div>
                               </div>
 
-                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-auto pt-4 border-t border-gray-50">
-                                <div>
-                                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">List Price</p>
-                                  <p className="text-xs font-bold text-gray-500 line-through">&#8377;{neg.product.price.toLocaleString()}</p>
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mt-auto pt-4 border-t border-gray-50">
+                                <div className="text-center sm:text-left">
+                                  <p className="text-[8px] sm:text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">List Price</p>
+                                  <p className="text-[10px] sm:text-xs font-bold text-gray-500 line-through">&#8377;{neg.product.price.toLocaleString()}</p>
                                 </div>
-                                <div>
-                                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Your Offer</p>
-                                  <p className="text-xs font-bold text-gray-900">&#8377;{neg.lastOfferPrice?.toLocaleString()}</p>
+                                <div className="text-center sm:text-left">
+                                  <p className="text-[8px] sm:text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Your Offer</p>
+                                  <p className="text-[10px] sm:text-xs font-bold text-gray-900">&#8377;{neg.lastOfferPrice?.toLocaleString()}</p>
                                 </div>
                                 {neg.status === 'ACCEPTED' && (
-                                  <div>
-                                    <p className="text-[9px] font-black text-green-600 uppercase tracking-widest mb-1">Final Deal</p>
-                                    <p className="text-xs font-black text-green-700">&#8377;{neg.agreedPrice?.toLocaleString()}</p>
+                                  <div className="text-center sm:text-left">
+                                    <p className="text-[8px] sm:text-[9px] font-black text-green-600 uppercase tracking-widest mb-1">Final Deal</p>
+                                    <p className="text-[10px] sm:text-xs font-black text-green-700">&#8377;{neg.agreedPrice?.toLocaleString()}</p>
                                   </div>
                                 )}
-                                <div>
-                                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Last Update</p>
-                                  <p className="text-xs font-bold text-gray-900">{new Date(neg.updatedAt).toLocaleDateString()}</p>
+                                <div className="text-center sm:text-left">
+                                  <p className="text-[8px] sm:text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Last Update</p>
+                                  <p className="text-[10px] sm:text-xs font-bold text-gray-900">{new Date(neg.updatedAt).toLocaleDateString()}</p>
                                 </div>
                               </div>
 
-                              <div className="flex gap-3 mt-6">
+                              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-6">
                                 <button 
                                   onClick={() => navigate(`/negotiate/${neg.product.id}?buyerId=${user._id}`)}
                                   className="flex-1 bg-black text-white py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-gray-800 transition-all flex items-center justify-center gap-2"
                                 >
-                                  <MessageSquare size={14} /> Open Chat
+                                  <MessageSquare size={14} /> Chat
                                 </button>
                                 {neg.status === 'ACCEPTED' && (
                                   <button 

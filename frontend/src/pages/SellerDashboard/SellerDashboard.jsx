@@ -567,8 +567,8 @@ return (
         </div>
       </aside>
 
-      <main className="flex-1 p-8 overflow-y-auto">
-        <div className="flex items-center justify-between mb-8">
+      <main className="flex-1 p-4 lg:p-8 overflow-y-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
           <div>
             <h1 className="text-xl font-bold text-gray-900">
               {activeTab === 'Earnings' ? t('earnings') + ' & AI Analytics' : t('seller_overview')}
@@ -579,7 +579,7 @@ return (
                 : t('track_performance')}
             </p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <div className="relative">
               <button
                 onClick={() => setShowLangDropdown(!showLangDropdown)}
@@ -1040,7 +1040,7 @@ return (
           </div>
         ) : (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
               {stats.map((stat, i) => (
                 <motion.div
                   key={stat.label}
