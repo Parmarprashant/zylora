@@ -13,7 +13,7 @@
 | ⚙️ **Backend API** | Deployed (Render) | [zylora-e-commerce.onrender.com](https://zylora-e-commerce.onrender.com/) |
 | 🎨 **Figma Design** | Original Assets | [View on Figma](https://www.figma.com/design/vt3eDlpqhdudT35CdsZjPg/Portfolio?node-id=0-1&t=DzB5ULzEV5Gu0Iph-1) |
 | 🖼️ **Figma Prototype** | Interaction Map | [Open Prototype](https://www.figma.com/design/vt3eDlpqhdudT35CdsZjPg/Portfolio?node-id=0-1&t=DzB5ULzEV5Gu0Iph-1) |
-| 📮 **Postman Docs** | API Reference | [View Documentation](https://documenter.getpostman.com/view/your-link-here) |
+| 📮 **Postman Docs** | API Reference | [View Documentation](https://documenter.getpostman.com/view/50841493/2sBXqKofA4) |
 | 🎥 **YouTube Demo** | Video Walkthrough | [Watch Presentation](https://youtube.com/your-link-here) |
 
 ---
